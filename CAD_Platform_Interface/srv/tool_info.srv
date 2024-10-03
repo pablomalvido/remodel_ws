@@ -1,0 +1,11 @@
+string name
+
+---------------
+bool success
+string type
+float64[] dim
+float64[] dim_tool
+float64[] dim_fingers
+geometry_msgs/Pose pose_nail
+geometry_msgs/Pose pose_base
+geometry_msgs/Pose pose_end

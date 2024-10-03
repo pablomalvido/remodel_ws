@@ -1,0 +1,11 @@
+geometry_msgs/Pose target_pose
+string arm_side
+bool rotate
+int8 ATC_sign
+bool routing_app
+bool route_arm
+bool picking_app
+bool secondary_frame
+
+---------------
+geometry_msgs/Pose pose

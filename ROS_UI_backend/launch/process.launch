@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="auto_process_action_server" pkg="ROS_UI_backend" type="automatic_control_server.py" output="screen">
+    </node>
+    <node name="process_action_client" pkg="ROS_UI_backend" type="automatic_control_client.py" output="screen">
+    </node>
+</launch>  

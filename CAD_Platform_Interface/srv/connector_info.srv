@@ -1,0 +1,14 @@
+string label
+
+---------------
+bool success
+string component
+string reference
+string model
+string type
+string color
+string WH
+string box
+string tray
+pins_data[] cables
+float64[] dimensions

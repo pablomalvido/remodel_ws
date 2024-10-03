@@ -1,0 +1,8 @@
+string group
+string target_named
+int32 type
+ArmsDisplacement target_pose 
+float64 speed_limit
+float64 accel_limit
+---------------
+bool success

@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="action_planner" pkg="elvez_pkg" type="action_planner.py" output="screen">
+    </node>
+</launch>  

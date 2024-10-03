@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="CAD_loader" pkg="ROS_UI_backend" type="load_files.py" output="screen">
+    </node>
+</launch>  

@@ -1,0 +1,6 @@
+string jig
+string spot
+
+---------------
+bool success
+jig_tape_data data

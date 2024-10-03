@@ -1,0 +1,7 @@
+string left
+string right
+string arms
+string torso
+
+---------------
+bool success

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="elvez_process_action_server" pkg="UI_nodes_pkg" type="process_UI_server_full.py" output="screen">
+    </node>
+    <node name="process_action_client" pkg="UI_nodes_pkg" type="client_ELVEZ_test.py" output="screen">
+    </node>
+    <node name="process_feedback" pkg="UI_nodes_pkg" type="publish_feedback.py" output="screen">
+    </node>
+</launch>  

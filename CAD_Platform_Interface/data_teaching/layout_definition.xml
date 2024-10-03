@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<data>
+    <box model="0101" xdim="200" ydim="200" zdim="5">
+        <tray id="1" xdim="200" ydim="200" zdim="5">
+            <pos name="x">0</pos>
+            <pos name="y">0</pos>
+            <pos name="z">0</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">0</rot>
+        </tray>
+    </box>
+</data>

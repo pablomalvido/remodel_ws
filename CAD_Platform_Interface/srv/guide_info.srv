@@ -1,0 +1,6 @@
+string jig
+string guide
+
+---------------
+bool success
+jig_guide_data data

@@ -1,0 +1,11 @@
+float_list[] waypoints_list
+float64[] EE_speed
+float64[] EE_ang_speed
+string arm_side
+float64 max_linear_accel
+float64 max_ang_accel
+float64 step
+
+---------------
+moveit_msgs/RobotTrajectory plan
+bool success

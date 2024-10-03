@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<data>
+    <wiring_harness id="1" first_connector="LU1" tray="B3.2">
+        <end_connector label="TY1">
+            <cable Row1="1" Col1="1" Row2="1" Col2="2">CA1</cable>
+            <cable Row1="1" Col1="2" Row2="1" Col2="1">CA2</cable>
+        </end_connector>
+        <end_connector label="EP1">
+            <cable Row1="1" Col1="5" Row2="1" Col2="1">CA5</cable>
+            <cable Row1="1" Col1="9" Row2="1" Col2="2">CA9</cable>
+        </end_connector>
+        <end_connector label="EP2">
+            <cable Row1="1" Col1="6" Row2="1" Col2="1">CA6</cable>
+            <cable Row1="1" Col1="10" Row2="1" Col2="2">CA10</cable>
+        </end_connector>
+        <end_connector label="Free">
+            <cable Row1="1" Col1="3">CA3</cable>
+            <cable Row1="1" Col1="4">CA4</cable>
+            <cable Row1="1" Col1="7">CA7</cable>
+            <cable Row1="1" Col1="8">CA8</cable>
+        </end_connector>
+    </wiring_harness>
+    <wiring_harness id="2" first_connector="LU2" tray="B3.1">
+        <end_connector label="MO1">
+            <cable Row1="1" Col1="1" Row2="2" Col2="2">CA11</cable>
+            <cable Row1="1" Col1="2" Row2="2" Col2="1">CA12</cable>
+            <cable Row1="1" Col1="3" Row2="1" Col2="1">CA13</cable>
+            <cable Row1="1" Col1="4" Row2="1" Col2="2">CA14</cable>
+        </end_connector>
+        <end_connector label="MO2">
+            <cable Row1="1" Col1="5" Row2="2" Col2="2">CA15</cable>
+            <cable Row1="1" Col1="6" Row2="2" Col2="1">CA16</cable>
+            <cable Row1="1" Col1="7" Row2="1" Col2="2">CA17</cable>
+            <cable Row1="1" Col1="8" Row2="1" Col2="1">CA18</cable>
+        </end_connector>
+        <end_connector label="TY2">
+            <cable Row1="1" Col1="9" Row2="1" Col2="2">CA19</cable>
+            <cable Row1="1" Col1="10" Row2="1" Col2="1">CA20</cable>
+            <cable Row1="1" Col1="11" Row2="1" Col2="3">CA21</cable>
+        </end_connector>
+    </wiring_harness>
+    <wiring_harness id="3" first_connector="MO5" tray="B1">
+        <end_connector label="TY3">
+            <cable Row1="1" Col1="2" Row2="1" Col2="2">CA24</cable>
+            <cable Row1="1" Col1="2" Row2="1" Col2="1">CA25</cable>
+        </end_connector>
+        <end_connector label="MO3">
+            <cable Row1="2" Col1="1" Row2="1" Col2="2">CA22</cable>
+            <cable Row1="2" Col1="2" Row2="1" Col2="1">CA23</cable>
+        </end_connector>
+        <end_connector label="MO4">
+            <cable Row1="1" Col1="1" Row2="1" Col2="2">CA26</cable>
+            <cable Row1="2" Col1="3" Row2="1" Col2="1">CA27</cable>
+        </end_connector>
+    </wiring_harness>
+</data>

@@ -1,0 +1,6 @@
+string group
+string target
+bool wait
+
+---------------
+bool success

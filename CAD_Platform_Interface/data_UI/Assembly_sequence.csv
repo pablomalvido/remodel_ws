@@ -1,0 +1,9 @@
+Order;Type of operation;Label;Spot
+1;EC;WH1;C1.1.R
+2;PC;WH1;J8.1.R
+3;RC;GR11;J1.1-J2.1-J3.1-J4.1
+4;RC;GR12;J1.1-J5.1-J6.1
+5;EC;WH3;C3.1.L
+6;PC;WH3;J9.1.L
+7;RC;WH3;J3.1-J2.1-J1.1
+8;T;WH1;J1.1-J2.1-J2.1

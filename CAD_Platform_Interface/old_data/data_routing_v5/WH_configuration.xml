@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<data>
+    <wiring_harness id="1" first_connector="CON1" tray="B3.1">
+        <end_connector label="Free">
+            <cable Row1="1" Col1="1">CA1</cable>
+        </end_connector>
+    </wiring_harness>
+    <wiring_harness id="2" first_connector="CON2" tray="B3.1">
+        <end_connector label="Free">
+            <cable Row1="1" Col1="1">CA2</cable>
+        </end_connector>
+    </wiring_harness>
+</data>

@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<data>
+    <jig model="0011" xdim="10" xcol1="0" xcol2="10" ydim="30" ycol1="-8" ycol2="22" zdim="100">
+        <guide couple="1">
+            <key length="10" gap="10" height="54.5" height_corner="54.5" xcol1="0" xcol2="10" ycol1="-14" ycol2="24">
+                <pos name="x">0</pos>
+                <pos name="y">6</pos>
+                <pos name="z">80</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="7.2" ydim="19.8" zdim="10">
+                <pos name="x">18.4</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </jig>
+    <jig model="0012" xdim="10" xcol1="0" xcol2="10" ydim="22" ycol1="0" ycol2="22" zdim="100">
+        <guide couple="1">
+            <key length="10" gap="10" height="55" height_corner="90" xcol1="0" xcol2="10" ycol1="-5" ycol2="25">
+                <pos name="x">0</pos>
+                <pos name="y">6</pos>
+                <pos name="z">100</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="5" ydim="26" zdim="25">
+                <pos name="x">14.44</pos>
+                <pos name="y">7.95</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0.2883</rot>
+            </collision>
+        </guide>
+    </jig>
+    <jig model="0013" xdim="10" xcol1="0" xcol2="10" ydim="22" ycol1="-8" ycol2="14" zdim="100">
+        <guide couple="1">
+            <key length="10" gap="10" height="55" height_corner="90" xcol1="0" xcol2="10" ycol1="-14" ycol2="16">
+                <pos name="x">0</pos>
+                <pos name="y">6</pos>
+                <pos name="z">100</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="5" ydim="26" zdim="25">
+                <pos name="x">14.44</pos>
+                <pos name="y">7.95</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0.2883</rot>
+            </collision>
+        </guide>
+    </jig>
+    <jig model="0014" xdim="18" xcol1="0" xcol2="18" ydim="22" ycol1="0" ycol2="22" zdim="100">
+        <guide couple="1">
+            <key length="1.5" gap="4.5" height="37" height_corner="37" xcol1="0" xcol2="18" ycol1="-11" ycol2="7">
+                <pos name="x">20</pos>
+                <pos name="y">4.5</pos>
+                <pos name="z">90</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="10" ydim="20" zdim="25">
+                <pos name="x">34</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </jig>
+    <comb model="0000210" xdim="10" xcol1="0" xcol2="10" ydim="34" ycol1="0" ycol2="34" zdim="65">
+        <guide couple="1">
+            <key length="10" gap="10" height="30" height_corner="0" xcol1="0" xcol2="10" ycol1="0" ycol2="34">
+                <pos name="x">0</pos>
+                <pos name="y">12</pos>
+                <pos name="z">65</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </comb>
+    <ATC_station model="0000301" xdim="10" ydim="34" zdim="65" tool="gun">
+    	<tool_base>
+		<pos name="x">66.75</pos>
+                <pos name="y">34.5</pos>
+                <pos name="z">145.0</pos>
+                <rot name="R">-1.57</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">-1.57</rot>
+	</tool_base>
+	<tool_end>
+                <pos name="x">100.0</pos>
+                <pos name="y">-55.0</pos>
+                <pos name="z">86.0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">1.57</rot>
+                <rot name="Y">0</rot>
+	</tool_end>
+	<tool_dim x="220.0" y="300.0" z="100.0"></tool_dim> <!-- tool_dim x is the max tool distance from the wrist in x. The real total x dimension in 350 -->
+    </ATC_station>
+    <ATC_station model="0000302" xdim="10" ydim="34" zdim="65" tool="gripper">
+    	<tool_base>
+		<pos name="x">25.0</pos>
+                <pos name="y">-48.0</pos>
+                <pos name="z">115.0</pos> <!-- 112.5 -->
+                <rot name="R">-1.57</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">-1.57</rot>
+	</tool_base>
+	<tool_end>
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">240.0</pos> <!--200.0 in the STL that means 6cm from finger base till the middle of the circle-->
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+	</tool_end>
+	<tool_dim x="73.0" y="25.0" z="265.0"></tool_dim>
+	<finger_dim finger_length = "40.0" finger_width = "20.0" finger_height = "125.0"></finger_dim> <!--finger_dim finger_length = "40.0(?)" finger_width = "40.0" finger_height = "85.0"></finger_dim-->
+	<gripper_nail>
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">260.0</pos> <!--220.0 in the STL-->
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+	</gripper_nail>
+    </ATC_station>
+</data>

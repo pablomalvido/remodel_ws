@@ -1,0 +1,12 @@
+string left_tool
+string right_tool
+string eef_link_left
+string eef_link_right
+string[] ATC_tools
+float64 left_ATC_angle
+float64 right_ATC_angle
+float64 left_ATC_dist
+float64 right_ATC_dist
+
+---------------
+bool success

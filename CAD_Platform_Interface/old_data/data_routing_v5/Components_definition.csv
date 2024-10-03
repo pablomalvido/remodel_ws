@@ -1,0 +1,5 @@
+Type;Model;Reference;Label;Color;length;Diameter;x;y;z;Type
+Connector;VGA;99999999;CON1;Grey;;;32.9;14.64;46.55;
+Connector;VGA;111;CON2;Grey;;;32.9;14.64;46.55;
+Cable;;;CA1;Grey;500;5.1;;;;
+Cable;;;CA2;Grey;500;5.1;;;;

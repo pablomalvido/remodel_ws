@@ -1,0 +1,740 @@
+<?xml version="1.0"?>
+<data>
+    <jig model="0000002" xdim="25.6" ydim="19.8" zdim="55">
+        <guide couple="1">
+            <key length="2.9" gap="3" height="7">
+                <pos name="x">22.71</pos>
+                <pos name="y">8.32</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="7.2" ydim="19.8" zdim="10">
+                <pos name="x">18.4</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </jig>
+    <jig model="0000003" xdim="243.13" ydim="159.72" zdim="55">
+        <guide couple="1">
+            <key length="5" gap="4" height="25">
+                <pos name="x">11.78</pos>
+                <pos name="y">16.91</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0.2883</rot>
+            </key>
+            <collision xdim="5" ydim="26" zdim="25">
+                <pos name="x">14.44</pos>
+                <pos name="y">7.95</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0.2883</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="9" gap="4" height="25">
+                <pos name="x">65.45</pos>
+                <pos name="y">12.06</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">1.23</rot>
+            </key>
+            <collision xdim="9" ydim="23" zdim="25">
+                <pos name="x">72.99</pos>
+                <pos name="y">9.38</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">1.23</rot>
+            </collision>
+        </guide>
+	<guide couple="3">
+            <key length="5" gap="4" height="25">
+                <pos name="x">78.88</pos>
+                <pos name="y">49.74</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">1.23</rot>
+            </key>
+            <collision xdim="5" ydim="23" zdim="25">
+                <pos name="x">86.41</pos>
+                <pos name="y">47.06</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">1.23</rot>
+            </collision>
+        </guide>
+	<guide couple="4">
+            <key length="4.67" gap="7" height="25">
+                <pos name="x">96.13</pos>
+                <pos name="y">94.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="7" ydim="23" zdim="25">
+                <pos name="x">94.12</pos>
+                <pos name="y">88.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+	<guide couple="5">
+            <key length="9" gap="8" height="25">
+                <pos name="x">125.13</pos>
+                <pos name="y">94.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="9" ydim="20" zdim="25">
+                <pos name="x">125.13</pos>
+                <pos name="y">88.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+	<guide couple="6">
+            <key length="10" gap="9" height="25">
+                <pos name="x">157.99</pos>
+                <pos name="y">94.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="18.14" ydim="31" zdim="25">
+                <pos name="x">157.99</pos>
+                <pos name="y">88.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+	<guide couple="7">
+            <key length="16.76" gap="3" height="25">
+                <pos name="x">162.99</pos>
+                <pos name="y">103.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">1.8736</rot>
+            </key>
+            <collision xdim="18.14" ydim="16" zdim="25">
+                <pos name="x">149.85</pos>
+                <pos name="y">103.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+	<guide couple="8">
+            <key length="7" gap="7" height="25">
+                <pos name="x">192.13</pos>
+                <pos name="y">94.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="7" ydim="22" zdim="25">
+                <pos name="x">192.13</pos>
+                <pos name="y">88.44</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <tape_spot id="1" xdim="24" ydim="52" zdim="55" guide="3">
+            <pos name="x">88.09</pos>
+            <pos name="y">51.77</pos>
+            <pos name="z">55</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">1.23</rot>
+        </tape_spot>
+        <tape_spot id="2" xdim="24" ydim="52" zdim="55" guide="5">
+            <pos name="x">100.99</pos>
+            <pos name="y">88.44</pos>
+            <pos name="z">55</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">0</rot>
+        </tape_spot>
+        <tape_spot id="3" xdim="24" ydim="52" zdim="55" guide="8">
+            <pos name="x">167.99</pos>
+            <pos name="y">88.44</pos>
+            <pos name="z">55</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">0</rot>
+        </tape_spot>
+    </jig>
+    <jig model="0000004" xdim="115" ydim="71" zdim="55">
+        <guide couple="1">
+            <key length="10" gap="9" height="25">
+                <pos name="x">34</pos>
+                <pos name="y">5.94</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="10" ydim="20" zdim="25">
+                <pos name="x">34</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="10" gap="9" height="25">
+                <pos name="x">74</pos>
+                <pos name="y">5.94</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="10" ydim="20" zdim="25">
+                <pos name="x">74</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+	<guide couple="3">
+            <key length="2" gap="9" height="25">
+                <pos name="x">98</pos>
+                <pos name="y">5.75</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="2" ydim="13" zdim="25">
+                <pos name="x">98</pos>
+                <pos name="y">3.75</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <tape_spot id="1" xdim="30" ydim="52" zdim="55" guide="1">
+            <pos name="x">44</pos>
+            <pos name="y">0</pos>
+            <pos name="z">55</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">0</rot>
+        </tape_spot>
+    </jig>
+    <jig model="0000005" xdim="80" ydim="72" zdim="55">
+        <guide couple="1">
+            <key length="10" gap="4" height="25">
+                <pos name="x">14</pos>
+                <pos name="y">8</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="10" ydim="20" zdim="25">
+                <pos name="x">14</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="15" gap="4" height="25">
+                <pos name="x">29</pos>
+                <pos name="y">8</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="15" ydim="22" zdim="25">
+                <pos name="x">29</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+	<guide couple="3">
+            <key length="12" gap="4" height="25">
+                <pos name="x">68</pos>
+                <pos name="y">8</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="12" ydim="20" zdim="25">
+                <pos name="x">68</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <tape_spot id="1" xdim="24" ydim="52" zdim="55" guide="3">
+            <pos name="x">44</pos>
+            <pos name="y">0</pos>
+            <pos name="z">55</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">0</rot>
+        </tape_spot>
+    </jig>
+    <jig model="0000006" xdim="30" ydim="75" zdim="55">
+        <guide couple="1">
+            <key length="4" gap="4" height="25">
+                <pos name="x">7</pos>
+                <pos name="y">36.98</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">-1.571</rot>
+            </key>
+            <collision xdim="7" ydim="18" zdim="25">
+                <pos name="x">0</pos>
+                <pos name="y">39.98</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">-1.571</rot>
+            </collision>
+        </guide>
+    </jig>
+    <jig model="0000007" xdim="110" ydim="71" zdim="55">
+        <guide couple="1">
+            <key length="7" gap="4" height="25">
+                <pos name="x">37</pos>
+                <pos name="y">8</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="7" ydim="22" zdim="25">
+                <pos name="x">37</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="19" gap="4" height="25">
+                <pos name="x">68</pos>
+                <pos name="y">8</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="19" ydim="20" zdim="25">
+                <pos name="x">68</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+	<guide couple="3">
+            <key length="6" gap="4" height="25">
+                <pos name="x">102</pos>
+                <pos name="y">8</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="6" ydim="20" zdim="25">
+                <pos name="x">102</pos>
+                <pos name="y">0</pos>
+                <pos name="z">55</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <tape_spot id="1" xdim="24" ydim="52" zdim="55" guide="1">
+            <pos name="x">44</pos>
+            <pos name="y">0</pos>
+            <pos name="z">55</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">0</rot>
+        </tape_spot>
+    </jig>    
+    <jig model="0000008" xdim="10" ydim="34" zdim="35">
+        <guide couple="1">
+            <key length="10" gap="5.2" height="30">
+                <pos name="x">0</pos>
+                <pos name="y">14.4</pos>
+                <pos name="z">35</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </jig>
+    <box model="0000101" xdim="120" ydim="460" zdim="120">
+        <tray id="1" xdim="110" ydim="450" zdim="30">
+            <pos name="x">5</pos>
+            <pos name="y">5</pos>
+            <pos name="z">5</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">0</rot>
+        </tray>
+    </box>
+    
+    <box model="0000102" xdim="560" ydim="222.5" zdim="49.51">
+        <tray id="1" xdim="550" ydim="115.07" zdim="14.83">
+            <pos name="x">5</pos>
+            <pos name="y">0</pos>
+            <pos name="z">4.83</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">0</rot>
+        </tray>
+        <tray id="2" xdim="550" ydim="99.93" zdim="14.835">
+            <pos name="x">5</pos>
+            <pos name="y">115.97</pos>
+            <pos name="z">4.83</pos>
+            <rot name="R">0</rot>
+            <rot name="P">0</rot>
+            <rot name="Y">0</rot>
+        </tray>
+    </box>
+    <comb model="0000202" xdim="25.6" ydim="19.8" zdim="55">
+        <guide couple="1">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">27.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">72.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </comb>
+    <comb model="0000203" xdim="25.6" ydim="19.8" zdim="55">
+        <guide couple="1">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">27.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">72.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </comb>
+    <comb model="0000204" xdim="25.6" ydim="19.8" zdim="55">
+        <guide couple="1">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">27.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">72.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </comb>
+    <comb model="0000205" xdim="25.6" ydim="19.8" zdim="55">
+        <guide couple="1">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">27.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">72.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </comb>
+    <comb model="0000206" xdim="25.6" ydim="19.8" zdim="55">
+        <guide couple="1">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">27.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">72.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </comb>
+    <comb model="0000207" xdim="25.6" ydim="19.8" zdim="55">
+        <guide couple="1">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">27.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">72.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </comb>
+    <comb model="0000208" xdim="25.6" ydim="19.8" zdim="55">
+        <guide couple="1">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">27.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+        <guide couple="2">
+            <key length="5" gap="4.9" height="10">
+                <pos name="x">13.55</pos>
+                <pos name="y">72.5</pos>
+                <pos name="z">40</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </comb>
+    <comb model="0000209" xdim="10" ydim="34" zdim="35">
+        <guide couple="1">
+            <key length="10" gap="5.2" height="30">
+                <pos name="x">0</pos>
+                <pos name="y">14.4</pos>
+                <pos name="z">35</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </key>
+            <collision xdim="0" ydim="0" zdim="0">
+                <pos name="x">0</pos>
+                <pos name="y">0</pos>
+                <pos name="z">0</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">0</rot>
+            </collision>
+        </guide>
+    </comb>
+</data>

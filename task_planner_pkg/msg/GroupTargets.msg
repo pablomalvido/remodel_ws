@@ -1,0 +1,2 @@
+string group
+string[] targets

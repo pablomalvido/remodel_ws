@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D version="3.0" profile="Immersive" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance" xsd:noNamespaceSchemaLocation="http://www.web3d.org/specifications/x3d-3.0.xsd">
+	<head>
+		<meta name="filename" content="table_layout.x3d" />
+		<meta name="generator" content="Blender 2.83.0" />
+	</head>
+	<Scene>
+		<NavigationInfo headlight="true"
+		                visibilityLimit="0.0"
+		                type='"EXAMINE", "ANY"'
+		                avatarSize="0.25, 1.75, 0.75"
+		                />
+		<Background DEF="WO_World"
+		            groundColor="0.051 0.051 0.051"
+		            skyColor="0.051 0.051 0.051"
+		            />
+		<Transform DEF="ID001"
+		           translation="0.000000 0.000000 0.000000"
+		           scale="0.001000 0.001000 0.001000"
+		           rotation="0.000000 0.707107 0.707107 3.141593"
+		           >
+					<Shape>
+						<Appearance>
+						</Appearance>
+						<IndexedFaceSet solid="false"
+						                coordIndex="0 1 2 -1 1 3 2 -1 3 4 2 -1 4 5 2 -1 5 0 2 -1 3 6 4 -1 6 5 4 -1 7 1 0 -1 5 7 0 -1 6 7 5 -1 7 3 1 -1 7 6 3 -1 "
+						                >
+							<Coordinate DEF="coords_ME_ID001_001"
+							            point="600.000000 0.000000 0.000000 -0.000024 0.000000 20.000000 -0.000024 0.000000 0.000000 -0.000024 800.000000 20.000000 -0.000024 800.000000 -0.000000 600.000000 800.000000 -0.000000 600.000000 800.000000 20.000000 600.000000 0.000000 20.000000 "
+							            />
+						</IndexedFaceSet>
+					</Shape>
+			<Transform DEF="ID002"
+			           translation="49.999996 249.999985 20.000000"
+			           scale="1.000000 1.000000 1.000000"
+			           rotation="0.000000 1.000000 0.000000 0.000000"
+			           >
+						<Shape>
+							<Appearance>
+							</Appearance>
+							<IndexedFaceSet solid="false"
+							                coordIndex="0 1 2 -1 1 3 2 -1 3 4 2 -1 4 5 2 -1 5 0 2 -1 3 6 4 -1 6 5 4 -1 7 1 0 -1 5 7 0 -1 6 7 5 -1 7 3 1 -1 7 6 3 -1 "
+							                >
+								<Coordinate DEF="coords_ME_ID002_001"
+								            point="200.000000 -0.000000 0.000000 -0.000003 -0.000000 10.000000 -0.000003 -0.000000 0.000000 -0.000003 200.000000 10.000000 -0.000003 200.000000 0.000000 200.000000 200.000000 0.000000 200.000000 200.000000 10.000000 200.000000 -0.000000 10.000000 "
+								            />
+							</IndexedFaceSet>
+						</Shape>
+			</Transform>
+			<Transform DEF="ID003"
+			           translation="49.999996 550.000000 20.000000"
+			           scale="1.000000 1.000000 1.000000"
+			           rotation="0.000000 1.000000 0.000000 0.000000"
+			           >
+						<Shape>
+							<Appearance>
+							</Appearance>
+							<IndexedFaceSet solid="false"
+							                coordIndex="0 1 2 -1 1 3 2 -1 3 4 2 -1 4 5 2 -1 5 0 2 -1 3 6 4 -1 6 5 4 -1 7 1 0 -1 5 7 0 -1 6 7 5 -1 7 3 1 -1 7 6 3 -1 "
+							                >
+								<Coordinate DEF="coords_ME_ID003_001"
+								            point="200.000000 -0.000000 0.000000 -0.000003 -0.000000 10.000000 -0.000003 -0.000000 0.000000 -0.000003 200.000000 10.000000 -0.000003 200.000000 0.000000 200.000000 200.000000 0.000000 200.000000 200.000000 10.000000 200.000000 -0.000000 10.000000 "
+								            />
+							</IndexedFaceSet>
+						</Shape>
+			</Transform>
+			<Transform DEF="ID004"
+			           translation="320.000000 249.999985 20.000000"
+			           scale="1.000000 1.000000 1.000000"
+			           rotation="0.000000 1.000000 0.000000 0.000000"
+			           >
+						<Shape>
+							<Appearance>
+							</Appearance>
+							<IndexedFaceSet solid="false"
+							                coordIndex="0 1 2 -1 1 3 2 -1 3 4 2 -1 4 5 2 -1 5 0 2 -1 3 6 4 -1 6 5 4 -1 7 1 0 -1 5 7 0 -1 6 7 5 -1 7 3 1 -1 7 6 3 -1 "
+							                >
+								<Coordinate DEF="coords_ME_ID004"
+								            point="200.000000 -0.000000 0.000000 -0.000003 -0.000000 10.000000 -0.000003 -0.000000 0.000000 -0.000003 200.000000 10.000000 -0.000003 200.000000 0.000000 200.000000 200.000000 0.000000 200.000000 200.000000 10.000000 200.000000 -0.000000 10.000000 "
+								            />
+							</IndexedFaceSet>
+						</Shape>
+			</Transform>
+			<Transform DEF="ID005"
+			           translation="320.000000 550.000000 20.000000"
+			           scale="1.000000 1.000000 1.000000"
+			           rotation="0.000000 1.000000 0.000000 0.000000"
+			           >
+						<Shape>
+							<Appearance>
+							</Appearance>
+							<IndexedFaceSet solid="false"
+							                coordIndex="0 1 2 -1 1 3 2 -1 3 4 2 -1 4 5 2 -1 5 0 2 -1 3 6 4 -1 6 5 4 -1 7 1 0 -1 5 7 0 -1 6 7 5 -1 7 3 1 -1 7 6 3 -1 "
+							                >
+								<Coordinate DEF="coords_ME_ID005"
+								            point="200.000000 -0.000000 0.000000 -0.000003 -0.000000 10.000000 -0.000003 -0.000000 0.000000 -0.000003 200.000000 10.000000 -0.000003 200.000000 0.000000 200.000000 200.000000 0.000000 200.000000 200.000000 10.000000 200.000000 -0.000000 10.000000 "
+								            />
+							</IndexedFaceSet>
+						</Shape>
+			</Transform>
+		</Transform>
+	</Scene>
+</X3D>

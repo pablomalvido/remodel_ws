@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="record_traj" pkg="ROS_UI_backend" type="record_trajectories.py" output="screen">
+    </node>
+</launch>  

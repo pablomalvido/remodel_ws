@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="tf" type="static_transform_publisher" name="platform_rf" args="0 0 0 0 3.14 -1.57 world platform_rf 10" />
+    <node name="UC2_handler" pkg="elvez_pkg" type="main_UC2.py" output="screen">
+        <param name="base_frame" value="/world" />
+        <param name="files_path" value="/home/remodel/catkin_ws/src/elvez_pkg/data_teaching/" />
+        <param name="cad_name" value="tableLayout" />
+        <param name="cad_name_combs" value=""/>
+	<param name="jigs_file" value="layout_definition.xml" />
+	<!-- Dummy files -->
+	<param name="components_file" value="Components_definition.csv" />
+	<param name="WH_file" value="WH_configuration.xml" />
+	<param name="seq_file" value="Assembly_sequence.csv" />
+    </node>
+</launch>  

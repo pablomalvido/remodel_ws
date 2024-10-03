@@ -1,0 +1,5 @@
+string file_name
+configProp[] data
+
+---------------
+bool success

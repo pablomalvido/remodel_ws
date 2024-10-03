@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="RSM_PLC_connection" pkg="remodel_safety_manager" type="PLC_connection.py" output="screen">
+    </node>
+</launch>  

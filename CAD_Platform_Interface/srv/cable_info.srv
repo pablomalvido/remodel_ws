@@ -1,0 +1,12 @@
+string label
+
+---------------
+bool success
+string component
+string color
+float64 length
+float64 diameter
+string WH
+string box
+string tray
+pins_data[] connectors

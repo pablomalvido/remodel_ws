@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="adv_manip_node" pkg="task_planner_pkg" type="advanced_manipulation.py" output="screen">
+    </node>
+    <node name="test_node" pkg="task_planner_pkg" type="test2.py" output="screen">
+    </node>
+</launch>  

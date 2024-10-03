@@ -1,0 +1,8 @@
+int32 index
+---------------
+bool success
+int32 index
+string type
+string[] label
+spot_data[] spot
+bool end

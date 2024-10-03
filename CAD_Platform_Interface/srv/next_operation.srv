@@ -1,0 +1,7 @@
+
+---------------
+bool success
+string type
+string[] label
+spot_data[] spot
+bool end

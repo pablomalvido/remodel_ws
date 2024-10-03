@@ -1,0 +1,12 @@
+string arm
+string end_guide
+float64 offset_z
+geometry_msgs/Pose target_pose
+bool target_provided
+string WH
+bool interpolate_z
+bool show
+
+---------------
+bool success
+geometry_msgs/Pose[] path

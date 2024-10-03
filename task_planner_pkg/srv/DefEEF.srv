@@ -1,0 +1,12 @@
+geometry_msgs/Pose EE_end_frame
+geometry_msgs/Pose EE_end_frame2
+float64 x
+float64 y
+float64 z
+geometry_msgs/Pose ATC_frame
+string name
+string path
+float64[] fingers_dim
+
+---------------
+bool success

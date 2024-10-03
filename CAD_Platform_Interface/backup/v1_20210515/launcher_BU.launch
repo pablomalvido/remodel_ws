@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="tf" type="static_transform_publisher" name="platform_rf" args="-0.66446 -0.27273 -0.41379 -1.57 0 1.309 torso_base_link platform_rf 10" />
+    <!--node pkg="tf" type="static_transform_publisher" name="platform_rf" args="-0.42317 -0.39171 0.8063 1.57 0 0.2618 torso_base_link platform_rf 10" /-->
+    <node name="UC2_handler" pkg="elvez_pkg" type="main_UC2.py" output="screen">
+        <param name="files_path" value="/home/rmpama/catkin_ws/src/elvez_pkg/data/" />
+        <param name="cad_name" value="platform" />
+	<param name="jigs_file" value="Jigs_definition_v2.xml" />
+	<param name="components_file" value="Components_definition.csv" />
+	<param name="WH_file" value="WH_configuration.xml" />
+	<param name="seq_file" value="Assembly_sequence.csv" />
+    </node>
+</launch>  

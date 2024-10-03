@@ -1,0 +1,5 @@
+string group
+moveit_msgs/RobotTrajectory plan
+
+---------------
+int8 step_inc

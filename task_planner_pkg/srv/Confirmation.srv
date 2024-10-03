@@ -1,0 +1,5 @@
+string img_path
+
+---------------
+bool success
+string[] message

@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="fake_sensors" pkg="ROS_UI_backend" type="fake_sensors.py" output="screen">
+    </node>
+</launch>  

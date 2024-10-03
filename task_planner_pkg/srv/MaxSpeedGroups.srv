@@ -1,0 +1,5 @@
+string group
+float64 speed
+
+---------------
+bool success

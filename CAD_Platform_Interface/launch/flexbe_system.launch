@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- CAD Platform -->
+	<include file="$(find elvez_pkg)/launch/launcher.launch"></include>
+
+	<!-- Simulation actions -->
+	<include file="$(find move_sda10f)/launch/simulation_actions_PC_RC_T.launch"></include>
+</launch>  

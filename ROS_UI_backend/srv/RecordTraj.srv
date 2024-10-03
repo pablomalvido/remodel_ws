@@ -1,0 +1,11 @@
+string robotNumber
+bool recordPose
+bool moveGripper
+bool closeGripper
+bool tape
+bool saveTraj
+string fileName
+
+---------------
+string result
+bool success

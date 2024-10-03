@@ -1,0 +1,4 @@
+Order;Type of operation;Label;Spot
+1;EC;CON1;C2.1-C1.1
+2;PC;CON1;J8.1.L
+3;RC;CON1;J5.1-J1.1-J6.1-J2.1-J3.1-J4.1-J7.1

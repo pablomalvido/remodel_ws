@@ -1,0 +1,9 @@
+string box
+string tray
+
+---------------
+bool success
+geometry_msgs/Pose key_corner_frame
+geometry_msgs/Pose key_center_frame
+string WH
+float64[] dimensions

@@ -1,0 +1,7 @@
+0001 table
+0011 guide TPU
+0014 mold MOLEX WH3
+0015 mold MOLEX WH1
+0016 separation guide 1
+0020 camera stand
+

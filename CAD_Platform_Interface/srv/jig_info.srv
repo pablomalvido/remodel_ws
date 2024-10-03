@@ -1,0 +1,9 @@
+string jig
+
+---------------
+bool success
+string commercial
+float64[] dimensions
+geometry_msgs/Pose corner_frame
+jig_guide_data[] guides
+jig_tape_data[] taping_spots

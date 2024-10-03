@@ -1,0 +1,14 @@
+#Goal
+int32 index
+int32 subindex
+int32 subindex2
+bool auto
+---------------
+#Result
+bool success
+---------------
+#Feedback
+int32 index
+int32 subindex
+int32 subindex2
+string message
