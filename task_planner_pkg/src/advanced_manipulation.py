@@ -106,7 +106,7 @@ class EEF(object):
         self.fingers_dim = fingers_dim
 
 
-ACT1=""
+ATC1=""
 
 class ATC(object):
     """
@@ -730,7 +730,7 @@ def def_EEF(req):
 rospy.Service("/adv_manip/def_EEF", DefEEF, def_EEF)
 
 def def_ATC(req):
-    global ACT1
+    global ATC1
     ATC_tools_list = []
     for tool in req.ATC_tools:
            ATC_tools_list.append(EEF_list[tool])
@@ -757,21 +757,21 @@ def go(req):
 
 rospy.Service("/adv_manip/go", MotionGroupsCommand, go)
 
-def get_current_pose(req):
-    resp = GetGroupPose()
+def get_current_pose_srv(req):
+    resp = GetGroupPoseResponse()
     resp.poseSt = motion_groups[motion_groups_map[req.group]].get_current_pose()
     return resp
 
-rospy.Service("/adv_manip/get_current_pose", GetGroupPose, get_current_pose)
+rospy.Service("/adv_manip/get_current_pose", GetGroupPose, get_current_pose_srv)
 
-def correctPose(req):
+def correctPoseSrv(req):
     global ATC1
     #Default values: rotate = False, ATC_sign = -1, routing_app = False, route_arm = True, picking_app = False, secondary_frame = False
     resp = GetCorrectPoseResponse()
     resp.pose = ATC1.correctPose(req.target_pose, req.arm_side, req.rotate, req.ATC_sign, req.routing_app, req.route_arm, req.picking_app, req.secondary_frame)        
     return resp
 
-rospy.Service("/adv_manip/correctPose", GetCorrectPose, correctPose)
+rospy.Service("/adv_manip/correct_pose", GetCorrectPose, correctPoseSrv)
 
 
 ###################################################
@@ -1078,9 +1078,13 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
         max_ang_accel *= (math.pi/180)
 
         #Define the speed profile accelerations
-        EE_speed_aux = copy.deepcopy(EE_speed)
+        EE_speed_aux = list(copy.deepcopy(EE_speed))
+        print(EE_speed_aux)
+        print(type(EE_speed_aux))
         EE_speed_aux.insert(0,0)
+        print("BBB")
         EE_speed_aux.append(0)
+        print("CCC")
         # print("SPEED_AUX")
         # print(EE_speed_aux)
         EE_ang_speed_aux = copy.deepcopy(EE_ang_speed)
@@ -2215,16 +2219,17 @@ def compute_cartesian_path_velocity_control_srv(req):
         if req.arm_side == "":
                req.arm_side = "left"
         if req.max_linear_accel == 0:
-               req.max_linear_accel = 200
+               req.max_linear_accel = 200.0
         if req.max_ang_accel == 0:
-               req.max_ang_accel = 140
+               req.max_ang_accel = 140.0
         if req.step == 0:
                req.step = 0.002
         waypoints_list = []
         for list_i in req.waypoints_list:
                waypoints_list.append(list_i.data)
-        resp = ComputePathResponse()        
-        resp.plan, resp.success = compute_cartesian_path_velocity_control(waypoints_list, req.EE_speed, req.EE_ang_speed, req.arm_side, req.max_linear_accel, req.max_ang_accel, False, req.step)
+        resp = ComputePathResponse()     
+        plan, success = compute_cartesian_path_velocity_control(waypoints_list, req.EE_speed, req.EE_ang_speed, req.arm_side, req.max_linear_accel, req.max_ang_accel, False, req.step)
+        resp.plan = plan; resp.success = success
         return resp
 
 rospy.Service("/adv_manip/compute_cartesian_path_velocity_control", ComputePath, compute_cartesian_path_velocity_control_srv)
@@ -2243,6 +2248,18 @@ def execute_plan_async_srv(req):
         return resp
 
 rospy.Service("/adv_manip/execute_plan_async", ExecuteMovement, execute_plan_async_srv)
+
+def get_fingers_size(req):
+        global ATC1
+        resp = FingersDimResponse()
+        if req.side == 'right':
+                tool = ATC1.EEF_right
+        else:
+                tool = ATC1.EEF_left        
+        resp.data = ATC1.EEF_dict[tool].fingers_dim
+        return resp
+
+rospy.Service("/adv_manip/get_fingers_size", FingersDim, get_fingers_size)
 
 
 rospy.spin()

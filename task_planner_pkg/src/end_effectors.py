@@ -3,13 +3,12 @@ import sys
 import os
 import copy
 import rospy
-import  rospkg
-import csv
-import PyKDL 
 from std_msgs.msg import *
 from std_srvs.srv import *
 import actionlib
-from UI_nodes_pkg.msg import gripper_ActFeedback, gripper_ActResult, gripper_ActAction, gripper_ActGoal
+from task_planner_pkg.msg import gripper_ActFeedback, gripper_ActResult, gripper_ActAction, gripper_ActGoal
+from task_planner_pkg.msg import EEFActAction, EEFActResult, EEFActFeedback, EEFActGoal
+from task_planner_pkg.srv import *
 from ROS_UI_backend.msg import configProp
 from industrial_msgs.msg import RobotStatus
 
@@ -58,17 +57,24 @@ def feedback_cb_left_grasp(fb):
 gripper_left_active = True
 gripper_right_active = True
 gripper_both_active = True
+config = {}
 
-
-def init_grippers(exe):
+def init_grippers(req):
         global execute_grippers
         global init
         global client_left_move
         global client_left_grasp
         global client_right_move
         global client_right_grasp
+        global gripper_right_distance
+        global gripper_left_distance
+        global config
 
-        execute_grippers = exe
+        gripper_right_distance = 0
+        gripper_left_distance = 0
+        config['grasp_distance'] = req.grasp_distance
+        config['slide_distance'] = req.slide_distance
+        execute_grippers = req.exe
         init = True
         if execute_grippers:
                 if gripper_left_active or gripper_both_active:
@@ -81,9 +87,14 @@ def init_grippers(exe):
                         client_right_move.wait_for_server()
                         client_right_grasp = actionlib.SimpleActionClient('/right_wsg/action/grasp', gripper_ActAction)
                         client_right_grasp.wait_for_server()
+        resp = EEFInitResponse()
+        resp.success = True
+        return resp
+
+rospy.Service("/EEF/init", EEFInit, init_grippers)
 
 
-def actuate_grippers(distance, speed, arm, config, grasp=False):
+def actuate_grippers(distance, speed, arm, grasp=False):
         global execute_grippers
         global gripper_left_finish
         global gripper_right_finish
@@ -94,6 +105,8 @@ def actuate_grippers(distance, speed, arm, config, grasp=False):
         global client_right_move
         global client_right_grasp
         global stop_mov
+        global config
+        global EEF_action
 
         if not init:
                 print("You must first initialize the grippers")
@@ -163,7 +176,11 @@ def actuate_grippers(distance, speed, arm, config, grasp=False):
                         left_gripper_msg.value = "Gripper slide"
                 else:
                         left_gripper_msg.value = "Gripper closed"    
-                feedback_publisher.publish(left_gripper_msg)    
+                feedback_publisher.publish(left_gripper_msg)   
+
+        fb = EEFActFeedback()
+        fb.done = True
+        EEF_action.publish_feedback(fb) 
 
 
 def actuate_gun():
@@ -174,3 +191,16 @@ def actuate_gun():
                 tape_srv = rospy.ServiceProxy('gun/tape', Trigger)
                 tape_res = tape_srv(TriggerRequest())
         return 1
+
+
+def goal_callback(goal):
+        if goal.type==0: #Gripper
+                actuate_grippers(goal.distance, goal.speed, goal.arm, goal.grasp)
+        else:
+                actuate_gun()
+        res = EEFActResult()
+        res.success = True
+        return res
+
+EEF_action = actionlib.SimpleActionServer("EEF/actuate", EEFActAction, goal_callback, False) #Defines the action server: Name of the server, type and callback function
+EEF_action.start() #Starts the action server, so it can be called from the client

@@ -1,0 +1,6 @@
+bool exe
+float32 grasp_distance
+float32 slide_distance
+
+---------------
+bool success

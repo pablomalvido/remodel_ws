@@ -1,0 +1,12 @@
+#Goal
+int8 type
+float32 distance
+float32 speed
+string arm
+bool grasp
+---------------
+#Result
+bool success
+---------------
+#Feedback
+bool done

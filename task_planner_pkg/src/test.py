@@ -3,19 +3,131 @@
 import copy
 import rospy
 import PyKDL 
-import moveit_commander
+import csv
 import rospkg
 from moveit_msgs.msg import *
 from moveit_msgs.srv import *
 import geometry_msgs.msg
 from utils import *
-from operations_test import *
 from elvez_pkg.msg import *
 from elvez_pkg.srv import *
+from task_planner_pkg.msg import *
 from task_planner_pkg.srv import *
+import actionlib
+from task_planner_pkg.msg import EEFActAction, EEFActResult, EEFActFeedback, EEFActGoal
 
 rospack = rospkg.RosPack()
 rospy.init_node('test_node', anonymous=True)
+
+#################### CONFIGURATION #########################
+config_full_pkg_path = str(rospack.get_path('ROS_UI_backend'))
+config_file_name = config_full_pkg_path + "/files/config.csv"
+config1 = {}
+config2 = {}
+try:
+        with open(config_file_name) as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                        config1[row['prop']] = row['value']
+except:
+        print("Cannot access to the configuration params")
+        exit()
+
+rospy.wait_for_service('/rosapi/nodes')
+get_nodes_srv = rospy.ServiceProxy('rosapi/nodes', Nodes)
+active_nodes = get_nodes_srv(NodesRequest()).nodes
+real_robot_nodes = ['/io_relay','/joint_state','/joint_trajectory_action','/move_group','/motion_streaming_interface','/robot_state_publisher']
+if all(x in active_nodes for x in real_robot_nodes):
+        real_robot = True
+else:
+        real_robot = False 
+
+print(config1)
+execute_grippers=False
+use_camera=False
+
+try:
+        if real_robot:
+                print('REAL ROBOT')
+                if config1['grippers_control_real'] == 'Y' or config1['grippers_control_real'] == 'y':
+                        config2['execute_grippers'] = True #True
+                else:
+                        config2['execute_grippers'] = False
+                if config1['gun_control_real'] == 'Y' or config1['gun_control_real'] == 'y':
+                        config2['execute_gun'] = True #True
+                else:
+                        config2['execute_gun'] = False
+                if config1['force_control_real'] == 'Y' or config1['force_control_real'] == 'y':
+                        config2['force_control_active'] = True #True
+                else:
+                        config2['force_control_active'] = False
+                if config1['use_camera_real'] == 'Y' or config1['use_camera_real'] == 'y':
+                        config2['use_camera'] = True #True
+                else:
+                        config2['use_camera'] = False
+                        print(execute_grippers)
+                        print(use_camera)
+                config2['speed_limit'] = min(float(config1['speed_real_per']),0.3) #0.05
+                config2['fast_speed_execution'] = min(float(config1['speed_fast_real_mms']),100) #40mm/s
+                config2['speed_execution'] = min(float(config1['speed_real_mms']),80) #20mm/s
+                config2['slow_speed_execution'] = min(float(config1['speed_slow_real_mms']),40) #10mm/s
+                config2['speed_tension'] = min(float(config1['speed_tension_real_mms']),40) #10mm/s
+        else:
+                print('SIMULATED ROBOT')
+                if config1['grippers_control_demo'] == 'Y' or config1['grippers_control_demo'] == 'y':
+                        config2['execute_grippers'] = True #False
+                else:
+                        config2['execute_grippers'] = False
+                if config1['use_camera_demo'] == 'Y' or config1['use_camera_demo'] == 'y':
+                        config2['use_camera'] = True #False
+                else:
+                        config2['use_camera'] = False
+                config2['force_control_active'] = False
+                config2['execute_gun'] = False
+                config2['speed_limit'] = float(config1['speed_demo_per']) #1
+                config2['fast_speed_execution'] = float(config1['speed_fast_demo_mms']) #100mm/s
+                config2['speed_execution'] = float(config1['speed_demo_mms']) #50mm/s
+                config2['slow_speed_execution'] = float(config1['speed_slow_demo_mms']) #30mm/s
+                config2['speed_tension'] = float(config1['speed_tension_demo_mms']) #20mm/s
+        
+        #Offsets
+        config2['z_offset'] = float(config1['offset_z'])/1000 #0.02
+        config2['x_offset'] = float(config1['offset_x'])/1000 #0.02
+        config2['grasp_offset'] = float(config1['offset_grasp'])/1000 #0.005
+        config2['force_offset'] = float(config1['offset_force'])/1000 #0.01
+        #pick_grasp_offset = float(config['offset_pick_grasp'])/1000 #0.015
+        pick_grasp_offset = {}
+        pick_grasp_offset['WH1'] = 0.015
+        pick_grasp_offset['WH3'] = 0.0255
+        config2['pick_grasp_offset'] = pick_grasp_offset
+        config2['z_offset_pick'] = float(config1['offset_pick_z'])/1000 #0.05
+        config2['z_offset_photo'] = float(config1['offset_photo_z'])/1000 #0.1
+        config2['gun_nozzle_offset'] = 0.1
+
+        rot_center = Pose()
+        rot_center_up = False
+
+        #Force sensor
+        force_cable = {}
+        force_connector = {}
+        force_cable['WH1'] = float(config1['cable_tension_wh1']) #3.5N
+        force_cable['WH3'] = float(config1['cable_tension_wh3']) #3.5N
+        force_connector['WH1'] = float(config1['connector_tension_wh1']) #5N
+        force_connector['WH3'] = float(config1['connector_tension_wh3']) #5N
+        config2['force_cable'] = force_cable
+        config2['force_connector'] = force_connector
+
+        #Gripper parameters
+        config2['open_distance'] = float(config1['gripper_open_dist']) #105
+        config2['slide_distance'] = float(config1['gripper_slide_dist']) #36
+        config2['grasp_distance'] = float(config1['gripper_grasp_dist']) #30
+        config2['gripper_speed'] = float(config1['gripper_speed']) #30
+        config2['gripper_speed_slow'] = float(config1['gripper_speed_slow']) #20
+except:
+        print("Error defining config robot values")
+        exit()
+
+######################## INITIALIZATION ##############################
 
 rospy.wait_for_service('/adv_manip/define_motion_groups')
 def_motion_groups_srv = rospy.ServiceProxy('/adv_manip/define_motion_groups', DefMotionGroups)
@@ -25,10 +137,6 @@ rospy.wait_for_service('/adv_manip/def_EEF')
 def_EEF_srv = rospy.ServiceProxy('/adv_manip/def_EEF', DefEEF)
 rospy.wait_for_service('/adv_manip/def_ATC')
 def_ATC_srv = rospy.ServiceProxy('/adv_manip/def_ATC', DefATC)
-rospy.wait_for_service('/adv_manip/set_named_target')
-set_named_target_srv = rospy.ServiceProxy('/adv_manip/set_named_target', MotionGroupsCommand)
-rospy.wait_for_service('/adv_manip/go')
-go_srv = rospy.ServiceProxy('/adv_manip/go', MotionGroupsCommand)
 
 motion_groups = ["arm_left", "arm_right", "arms", "torso"]
 req = DefMotionGroupsRequest()
@@ -84,18 +192,229 @@ EE_file_path_gripper_R = str(rospack.get_path('motoman_sda10f_support')) + '/mes
 EE_file_path_gun = str(rospack.get_path('motoman_sda10f_support')) + '/meshes/EE/gun_vert_v3_ROS.stl'
 
 req = DefEEFRequest()
-req.EE_end_frame = gripper_end_frame_L; req.EE_end_frame2 = gripper_end_frame_L2; req.x = 0.073; req.y = 0.025; req.z = 0.24; req.fingers_dim = fingers_dim; req.ATC_frame = gripper_left_ATC_frame; req.name = "EEF_gripper_left"; req.path = EE_file_path_gripper_L
+req.EE_end_frame = frame_to_pose(gripper_end_frame_L); req.EE_end_frame2 = frame_to_pose(gripper_end_frame_L2); req.x = 0.073; req.y = 0.025; req.z = 0.24; req.fingers_dim = fingers_dim; req.ATC_frame = frame_to_pose(gripper_left_ATC_frame); req.name = "EEF_gripper_left"; req.path = EE_file_path_gripper_L
 def_EEF_srv(req)
-req.EE_end_frame = gripper_end_frame_R; req.EE_end_frame2 = gripper_end_frame_R2; req.x = 0.073; req.y = 0.025; req.z = 0.24; req.fingers_dim = fingers_dim; req.ATC_frame = gripper_right_ATC_frame; req.name = "EEF_gripper_right"; req.path = EE_file_path_gripper_R
+req.EE_end_frame = frame_to_pose(gripper_end_frame_R); req.EE_end_frame2 = frame_to_pose(gripper_end_frame_R2); req.x = 0.073; req.y = 0.025; req.z = 0.24; req.fingers_dim = fingers_dim; req.ATC_frame = frame_to_pose(gripper_right_ATC_frame); req.name = "EEF_gripper_right"; req.path = EE_file_path_gripper_R
 def_EEF_srv(req)
-req.EE_end_frame = gun_end_frame; req.EE_end_frame2 = Pose(); req.x = 0.35; req.y = 0.3; req.z = 0.1; req.fingers_dim = []; req.ATC_frame = gun_ATC_frame; req.name = "EEF_taping_gun"; req.path = EE_file_path_gun
+req.EE_end_frame = frame_to_pose(gun_end_frame); req.EE_end_frame2 = Pose(); req.x = 0.35; req.y = 0.3; req.z = 0.1; req.fingers_dim = []; req.ATC_frame = frame_to_pose(gun_ATC_frame); req.name = "EEF_taping_gun"; req.path = EE_file_path_gun
 def_EEF_srv(req)
 
 req = DefATCRequest()
 req.left_tool="EEF_gripper_left"; req.right_tool="EEF_gripper_right"; req.eef_link_left=eef_link_left; req.eef_link_right=eef_link_right; req.ATC_tools=["EEF_taping_gun"]; req.left_ATC_angle=0.7854; req.right_ATC_angle=-0.7854; req.left_ATC_dist=0.083; req.right_ATC_dist=0.054
 def_ATC_srv(req)
 
-#####################
+rospy.wait_for_service('/EEF/init')
+init_eef_srv = rospy.ServiceProxy('/EEF/init', EEFInit)
+req = EEFInitRequest()
+req.grasp_distance = config2['grasp_distance']; req.slide_distance = config2['slide_distance']; req.exe = config2['execute_grippers']
+init_eef_srv(req)
+
+#################################### ROBOT OPERATIONS ####################################
+
+def EC(op, step2=0, config=[], route_group=""):
+
+        global grasping_cables
+
+        step1_increase = 0
+        grasping_cables = False
+        print("Pick connector")
+        print("Step2: "+str(step2))
+        if op['spot']['side'] == "R":
+                pick_arm = "right"
+        else:
+                pick_arm = "left"
+        fingers_size = get_fingers_size(pick_arm)
+        main_arm = 'arm_'+pick_arm
+
+        prepick_pose = 'arm_'+pick_arm+'_prepick'
+        if op["spot"]["name"] == "WH3":
+                pick_pose = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']/2, - fingers_size[0]/2 - config['pick_grasp_offset'][op["spot"]["name"]] - config['grasp_offset'], op["spot"]["height"]/2 + 0.01, 0, 0, 0])
+        else:
+                pick_pose = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']/2, - fingers_size[0]/2 - config['pick_grasp_offset'][op["spot"]["name"]] - config['grasp_offset'], op["spot"]["height"]/2, 0, 0, 0])
+        pick_pose = get_shifted_pose(pick_pose, [0, 0, 0, 0, 0, -1.5708])
+        pick_pose_offset = get_shifted_pose(pick_pose, [0, 0, op["spot"]["height"]/2 + config['z_offset_pick'], 0, 0, 0])
+
+        if step2 == 0:
+                #Move to predefined dual-arm config (pointing down)
+                set_named_target('arms', "arms_platform_5")
+                go('arms')
+                step2=1
+                rospy.sleep(0.5)
+        
+        if step2 == 1:
+                #Move torso to config
+                set_named_target('torso', "torso_combs")
+                go('torso')
+                step2=2
+                rospy.sleep(0.5)
+
+        if step2 == 2:
+                #Move pick_arm to predefined config (orientation for picking)
+                set_named_target(main_arm, prepick_pose)
+                step2+=move_group_async(main_arm)
+                rospy.sleep(0.5)
+
+        if step2 == 3:
+                #Move arm to grasp cable (with approach+retract)
+                waypoints_EC1 = []
+                init_pose = get_current_pose(main_arm).pose
+                waypoints_EC1.append(init_pose)
+                waypoints_EC1.append(correctPose(pick_pose_offset, pick_arm, rotate = True, ATC_sign = -1, picking_app = True))
+                plan, success = compute_cartesian_path_velocity_control([waypoints_EC1], [config['fast_speed_execution']], arm_side=pick_arm)
+                if success:
+                        step2+=execute_plan_async(route_group, plan)
+
+        if step2 == 4:
+                actuate_grippers(config['open_distance'], config['gripper_speed'], pick_arm, config, grasp=False)
+                waypoints_EC2 = []
+                init_pose = get_current_pose(main_arm).pose
+                waypoints_EC2.append(init_pose)
+                waypoints_EC2.append(correctPose(pick_pose, pick_arm, rotate = True, ATC_sign = -1, picking_app = True))
+                plan, success = compute_cartesian_path_velocity_control([waypoints_EC2], [config['slow_speed_execution']], arm_side=pick_arm)
+                if success:
+                        step2+=execute_plan_async(route_group, plan)
+
+        if step2 == 5:
+                actuate_grippers(config['grasp_distance'], config['gripper_speed'], pick_arm, config, grasp=True)
+                rospy.sleep(1.0)
+                waypoints_EC3 = []
+                init_pose = get_current_pose(main_arm).pose
+                waypoints_EC3.append(init_pose)
+                waypoints_EC3.append(correctPose(pick_pose_offset, pick_arm, rotate = True, ATC_sign = -1, picking_app = True))
+                plan, success = compute_cartesian_path_velocity_control([waypoints_EC3], [config['slow_speed_execution']], arm_side=pick_arm)
+                if success:
+                        step2+=execute_plan_async(route_group, plan)
+
+        if step2 == 6:
+                #Move to predefined dual-arm config
+                set_named_target(main_arm, prepick_pose)
+                step2+=move_group_async('arm_'+pick_arm)
+                rospy.sleep(0.5)
+
+        if step2 == 7:
+                set_named_target('arms', "arms_platform_5")
+                move_group_async("arms")
+                step1_increase=1
+                rospy.sleep(0.5)
+                #PUBLISH FEEDBACK AFTER FINISHING EACH OPERATION
+        
+        return step2, step1_increase
+
+
+########################## ADVANCED MANIPULATION FUNCTIONS #######################################
+
+def set_named_target(group, target):
+        rospy.wait_for_service('/adv_manip/set_named_target')
+        set_named_target_srv = rospy.ServiceProxy('/adv_manip/set_named_target', MotionGroupsCommand)
+        req = MotionGroupsCommandRequest()
+        req.group = group; req.target = target
+        set_named_target_srv(req)
+
+def go(group, wait=True):
+        rospy.wait_for_service('/adv_manip/go')
+        go_srv = rospy.ServiceProxy('/adv_manip/go', MotionGroupsCommand)
+        req = MotionGroupsCommandRequest()
+        req.group = group; req.wait = wait
+        go_srv(req)
+
+def correctPose(target_pose, arm_side, rotate = False, ATC_sign = -1, routing_app = False, route_arm = True, picking_app = False, secondary_frame = False):
+        rospy.wait_for_service('/adv_manip/correct_pose')
+        correct_srv = rospy.ServiceProxy('/adv_manip/correct_pose', GetCorrectPose)
+        req = GetCorrectPoseRequest()
+        req.target_pose = target_pose; req.arm_side = arm_side; req.rotate = rotate; req.ATC_sign = ATC_sign; req.routing_app = routing_app; req.route_arm = route_arm; req.picking_app = picking_app; req.secondary_frame = secondary_frame
+        return correct_srv(req).pose
+
+def get_current_pose(group):
+        rospy.wait_for_service('/adv_manip/get_current_pose')
+        get_pose_srv = rospy.ServiceProxy('/adv_manip/get_current_pose', GetGroupPose)
+        req = GetGroupPoseRequest()
+        req.group = group
+        return get_pose_srv(req).poseSt
+
+def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_speed = [], arm_side = "left", max_linear_accel = 200.0, max_ang_accel = 140.0, step = 0.002):
+        rospy.wait_for_service('/adv_manip/compute_cartesian_path_velocity_control')
+        compute_path_srv = rospy.ServiceProxy('/adv_manip/compute_cartesian_path_velocity_control', ComputePath)
+        req = ComputePathRequest()
+        for list_wp in waypoints_list:
+                msg = float_list()
+                for wp in list_wp:
+                        msg.data.append(wp)
+                #msg.data = list_wp
+                req.waypoints_list.append(msg), 
+        req.EE_speed = EE_speed; req.EE_ang_speed = EE_ang_speed; req.arm_side = arm_side; req.max_linear_accel = max_linear_accel; req.max_ang_accel = max_ang_accel; req.step = step
+        resp = compute_path_srv(req)
+        return resp.plan, resp.success
+
+def move_group_async(group):
+        rospy.wait_for_service('/adv_manip/move_group_async')
+        move_async_srv = rospy.ServiceProxy('/adv_manip/move_group_async', ExecuteMovement)
+        req = ExecuteMovementRequest()
+        req.group = group
+        return move_async_srv(req).step_inc
+
+def execute_plan_async(group, plan):
+        rospy.wait_for_service('/adv_manip/execute_plan_async')
+        move_async_srv = rospy.ServiceProxy('/adv_manip/execute_plan_async', ExecuteMovement)
+        req = ExecuteMovementRequest()
+        req.group = group
+        req.plan = plan
+        return move_async_srv(req).step_inc
+
+def get_fingers_size(side):
+        rospy.wait_for_service('/adv_manip/get_fingers_size')
+        fingers_srv = rospy.ServiceProxy('/adv_manip/get_fingers_size', FingersDim)
+        req = FingersDimRequest()
+        req.side = side
+        return fingers_srv(req.side).data
+
+eef_done=False
+def eef_feedback_callback(fb):
+        global eef_done
+        if fb.done:
+                eef_done = True
+
+def actuate_eef(type, distance=0, speed=0, arm="left", grasp=False):
+        global eef_done
+        client=actionlib.SimpleActionClient('/EEF/actuate', EEFActAction) #Stablishes the connection with the server
+        client.wait_for_server()
+        goal = EEFActGoal()
+        goal.type = type; goal.distance = distance; goal.speed = speed; goal.arm = arm; goal.grasp = grasp
+        client.send_goal(goal, feedback_cb=eef_feedback_callback)
+        while not eef_done:
+                rospy.sleep(0.05)
+        eef_done = False
+
+def actuate_grippers(distance, speed, arm, config, grasp=False):
+        actuate_eef(0, distance, speed, arm, grasp)
+
+def actuate_gun():
+        actuate_eef(1)
+
+br = tf.TransformBroadcaster() 
+
+def broadcastTransform(br, frame, frame_id, parent_frame, time=rospy.get_rostime()): 
+    """
+    Get the tf between 2 frames
+    """
+    br.sendTransform((frame.p.x(), frame.p.y(), frame.p.z()), 
+        frame.M.GetQuaternion(), 
+        time, 
+        frame_id, 
+        parent_frame)
+
+def visualize_keypoints_simple(poses, parent_frame = "/torso_base_link"):
+        """
+        Visualize a list of poses [Pose] with respect to the parent_frame
+        """
+        while not rospy.is_shutdown():
+                number = 2000
+                for waypoint in poses:
+                        current_time = rospy.get_rostime()
+                        waypoint_frame = pose_to_frame(waypoint)
+                        broadcastTransform(br, waypoint_frame, str(number), parent_frame, time=current_time)
+                        number += 1
+
+##################### TASK PLANNER ######################
 def get_last_connector_info(op):
         global ops_info
         current_index = ops_info.index(op)
@@ -108,6 +427,25 @@ def get_last_connector_info(op):
                         last_PC = op_i
                 op_index+=1
         return last_PC
+
+
+def get_next_connector_info(op):
+        global ops_info
+        current_index = ops_info.index(op)
+        op_index = 0
+        next_PC = {}
+        for op_i in ops_info:
+                if op_index <= current_index:
+                        print("NOT PC")
+                        print(op_i)
+                        op_index+=1
+                        continue
+                if op_i['type'] == "PC":
+                        print("PC")
+                        print(op_i)
+                        next_PC = op_i
+                op_index+=1
+        return next_PC
 
 
 def update_route_arm_info(op):
@@ -136,10 +474,12 @@ def execute_operation(op):
         global group2 
         global step1
         global step2 
-        global config
+        global config2
 
         if op['type'] == "EC":
-            step2, step1_inc = EC(op, step2, config, route_group)              
+                PC_op = get_next_connector_info(op)
+                update_route_arm_info(PC_op)
+                step2, step1_inc = EC(op, step2, config2, route_group)              
 
         """    
         elif op['type'] == "PC":
@@ -170,9 +510,7 @@ def execute_operation(op):
         """
         step1 += step1_inc
 
-#####################################
-print("CCC")
-
+#CAD Platform info
 rospy.wait_for_service('ELVEZ_platform_handler/all_operations')
 my_service = rospy.ServiceProxy('ELVEZ_platform_handler/all_operations', all_operations)
 opsReq = all_operationsRequest()
@@ -308,11 +646,8 @@ for ops in opsResult.data:
         ops_info.append(ops_temp)
         ops_info_text.append(ops_info_text_temp)
 
-print(ops_info)
+#print(ops_info)
 
-config={'grasp_offset':0.05, 'gripper_speed':30, 'open_distance':90, 'slide_distance':40, 'grasp_distance':30}
-
-init_grippers(False)
 step1 = 0
 step2 = 0
 execute_operation(ops_info[step1])

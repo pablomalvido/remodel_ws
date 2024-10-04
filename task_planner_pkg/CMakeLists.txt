@@ -52,6 +52,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
+  float_list.msg
   GroupTargets.msg
 )
 
@@ -65,7 +66,11 @@ add_service_files(
    GetGroupPose.srv
    MaxSpeedGroups.srv
    MotionGroupsCommand.srv
+   ComputePath.srv
+   ExecuteMovement.srv
    Confirmation.srv
+   FingersDim.srv
+   EEFInit.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -73,6 +78,7 @@ add_action_files(
   FILES
   process_UI.action
   gripper_Act.action
+  EEFAct.action
 )
 
 ## Generate added messages and services with any dependencies listed here

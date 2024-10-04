@@ -56,10 +56,9 @@ def EC(op, step2=0, config=[], route_group=""):
         print("Step2: "+str(step2))
         if op['spot']['side'] == "R":
                 pick_arm = "right"
-                fingers_size = ATC1.EEF_dict[ATC1.EEF_right].fingers_dim #GET fingers_size with a srv
         else:
                 pick_arm = "left"
-                fingers_size = ATC1.EEF_dict[ATC1.EEF_left].fingers_dim
+        fingers_size = get_fingers_size(pick_arm)
         main_arm = 'arm_'+pick_arm
 
         prepick_pose = 'arm_'+pick_arm+'_prepick'
@@ -152,23 +151,52 @@ def go(group, wait=True):
         req.group = group; req.wait = wait
         go_srv(req)
 
-def correctPose():
-        pass
+def correctPose(target_pose, arm_side, rotate = False, ATC_sign = -1, routing_app = False, route_arm = True, picking_app = False, secondary_frame = False):
+        rospy.wait_for_service('/adv_manip/correct_pose')
+        correct_srv = rospy.ServiceProxy('/adv_manip/correct_pose', GetCorrectPose)
+        req = GetCorrectPoseRequest()
+        req.target_pose = target_pose; req.arm_side = arm_side; req.rotate = rotate; req.ATC_sign = ATC_sign; req.routing_app = routing_app; req.route_arm = route_arm; req.picking_app = picking_app; req.secondary_frame = secondary_frame
+        return correct_srv(req).pose
 
-def get_current_pose():
-        pass #return pose_stamped
+def get_current_pose(group):
+        rospy.wait_for_service('/adv_manip/get_current_pose')
+        get_pose_srv = rospy.ServiceProxy('/adv_manip/get_current_pose', GetGroupPose)
+        req = GetGroupPoseRequest()
+        req.group = group
+        return get_pose_srv(req).poseSt
 
-def compute_cartesian_path_velocity_control():
-        pass
+def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_speed = [], arm_side = "left", max_linear_accel = 200.0, max_ang_accel = 140.0, step = 0.002):
+        rospy.wait_for_service('/adv_manip/compute_cartesian_path_velocity_control')
+        compute_path_srv = rospy.ServiceProxy('/adv_manip/compute_cartesian_path_velocity_control', ComputePath)
+        req = ComputePathRequest()
+        for list_wp in waypoints_list:
+                msg = float_list()
+                msg.data = list_wp
+                req.waypoints_list.append(msg), 
+        req.EE_speed = EE_speed; req.EE_ang_speed = EE_ang_speed; req.arm_side = arm_side; req.max_linear_accel = max_linear_accel; req.max_ang_accel = max_ang_accel; req.step = step
+        resp = compute_path_srv(req)
+        return resp.plan, resp.success
 
-def move_group_async():
-        pass #return step_inc
+def move_group_async(group):
+        rospy.wait_for_service('/adv_manip/move_group_async')
+        move_async_srv = rospy.ServiceProxy('/adv_manip/move_group_async', ExecuteMovement)
+        req = ExecuteMovementRequest()
+        req.group = group
+        return move_async_srv(req).step_inc
 
-def execute_plan_async():
-        pass
+def execute_plan_async(group):
+        rospy.wait_for_service('/adv_manip/execute_plan_async')
+        move_async_srv = rospy.ServiceProxy('/adv_manip/execute_plan_async', ExecuteMovement)
+        req = ExecuteMovementRequest()
+        req.group = group
+        return move_async_srv(req).step_inc
 
 def get_fingers_size(side):
-        pass
+        rospy.wait_for_service('/adv_manip/get_fingers_size')
+        fingers_srv = rospy.ServiceProxy('/adv_manip/get_fingers_size', FingersDim)
+        req = FingersDimRequest()
+        req.side = side
+        return fingers_srv(req.side).data
 
 
 ##########################################################
