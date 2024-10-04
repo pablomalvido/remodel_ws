@@ -1,0 +1,10 @@
+#Goal
+string group
+moveit_msgs/RobotTrajectory plan
+---------------
+#Result
+bool success
+---------------
+#Feedback
+bool done
+int8 step_inc

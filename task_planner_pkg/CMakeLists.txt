@@ -79,6 +79,7 @@ add_action_files(
   process_UI.action
   gripper_Act.action
   EEFAct.action
+  ExecutePlan.action
 )
 
 ## Generate added messages and services with any dependencies listed here

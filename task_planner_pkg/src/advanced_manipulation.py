@@ -26,6 +26,7 @@ from ROS_UI_backend.msg import *
 from ROS_UI_backend.srv import *
 from task_planner_pkg.msg import gripper_ActFeedback, gripper_ActResult, gripper_ActAction, gripper_ActGoal
 from task_planner_pkg.msg import process_UIFeedback, process_UIResult, process_UIAction, process_UIGoal
+from task_planner_pkg.msg import ExecutePlanAction, ExecutePlanFeedback, ExecutePlanGoal, ExecutePlanResult
 import actionlib
 from actionlib_msgs.msg import GoalStatusArray
 from vision_pkg_full_demo.srv import *
@@ -1079,12 +1080,8 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
 
         #Define the speed profile accelerations
         EE_speed_aux = list(copy.deepcopy(EE_speed))
-        print(EE_speed_aux)
-        print(type(EE_speed_aux))
         EE_speed_aux.insert(0,0)
-        print("BBB")
         EE_speed_aux.append(0)
-        print("CCC")
         # print("SPEED_AUX")
         # print(EE_speed_aux)
         EE_ang_speed_aux = copy.deepcopy(EE_ang_speed)
@@ -2234,7 +2231,7 @@ def compute_cartesian_path_velocity_control_srv(req):
 
 rospy.Service("/adv_manip/compute_cartesian_path_velocity_control", ComputePath, compute_cartesian_path_velocity_control_srv)
 
-
+"""
 def move_group_async_srv(req):
         resp = ExecuteMovementResponse()
         resp.step_inc = move_group_async(motion_groups_map[req.group])
@@ -2248,6 +2245,33 @@ def execute_plan_async_srv(req):
         return resp
 
 rospy.Service("/adv_manip/execute_plan_async", ExecuteMovement, execute_plan_async_srv)
+"""
+
+def async_move_goal_callback(goal):
+        global move_async_action
+        fb = ExecutePlanFeedback()
+        res = ExecutePlanResult()
+        fb.step_inc = move_group_async(motion_groups_map[goal.group])
+        fb.done = True
+        move_async_action.publish_feedback(fb)
+        res.success = True
+        move_async_action.set_succeeded(res)
+
+move_async_action = actionlib.SimpleActionServer("adv_manip/move_group_async", ExecutePlanAction, async_move_goal_callback, False)
+move_async_action.start()
+
+def async_plan_goal_callback(goal):
+        global exe_plan_async_action
+        fb = ExecutePlanFeedback()
+        res = ExecutePlanResult()
+        fb.step_inc = execute_plan_async(motion_groups_map[goal.group], goal.plan)
+        fb.done = True
+        exe_plan_async_action.publish_feedback(fb)
+        res.success = True
+        exe_plan_async_action.set_succeeded(res)
+
+exe_plan_async_action = actionlib.SimpleActionServer("adv_manip/execute_plan_async", ExecutePlanAction, async_plan_goal_callback, False)
+exe_plan_async_action.start()
 
 def get_fingers_size(req):
         global ATC1

@@ -181,6 +181,9 @@ def actuate_grippers(distance, speed, arm, grasp=False):
         fb = EEFActFeedback()
         fb.done = True
         EEF_action.publish_feedback(fb) 
+        res = EEFActResult()
+        res.success = True
+        EEF_action.set_succeeded(res)
 
 
 def actuate_gun():

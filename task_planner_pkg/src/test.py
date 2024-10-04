@@ -15,6 +15,7 @@ from task_planner_pkg.msg import *
 from task_planner_pkg.srv import *
 import actionlib
 from task_planner_pkg.msg import EEFActAction, EEFActResult, EEFActFeedback, EEFActGoal
+from task_planner_pkg.msg import ExecutePlanAction, ExecutePlanGoal, ExecutePlanFeedback
 
 rospack = rospkg.RosPack()
 rospy.init_node('test_node', anonymous=True)
@@ -345,6 +346,7 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
         resp = compute_path_srv(req)
         return resp.plan, resp.success
 
+"""
 def move_group_async(group):
         rospy.wait_for_service('/adv_manip/move_group_async')
         move_async_srv = rospy.ServiceProxy('/adv_manip/move_group_async', ExecuteMovement)
@@ -359,6 +361,50 @@ def execute_plan_async(group, plan):
         req.group = group
         req.plan = plan
         return move_async_srv(req).step_inc
+"""
+
+step_inc_fb = 0
+async_move_done=False
+def async_move_feedback_callback(fb):
+        global async_move_done
+        global step_inc_fb
+        if fb.done:
+                async_move_done = True
+                step_inc_fb = fb.step_inc
+
+def move_group_async(group):
+        global async_move_done
+        global step_inc_fb
+        client=actionlib.SimpleActionClient('/adv_manip/move_group_async', ExecutePlanAction)
+        client.wait_for_server()
+        goal = ExecutePlanGoal()
+        goal.group = group
+        client.send_goal(goal, feedback_cb=async_move_feedback_callback)
+        while not async_move_done:
+                rospy.sleep(0.05)
+        async_move_done = False
+        return step_inc_fb
+
+async_plan_done=False
+def async_plan_feedback_callback(fb):
+        global async_plan_done
+        global step_inc_fb
+        if fb.done:
+                async_plan_done = True
+                step_inc_fb = fb.step_inc
+
+def execute_plan_async(group, plan):
+        global async_plan_done
+        global step_inc_fb
+        client=actionlib.SimpleActionClient('/adv_manip/execute_plan_async', ExecutePlanAction)
+        client.wait_for_server()
+        goal = ExecutePlanGoal()
+        goal.group = group; goal.plan = plan
+        client.send_goal(goal, feedback_cb=async_plan_feedback_callback)
+        while not async_plan_done:
+                rospy.sleep(0.05)
+        async_plan_done = False
+        return step_inc_fb
 
 def get_fingers_size(side):
         rospy.wait_for_service('/adv_manip/get_fingers_size')
