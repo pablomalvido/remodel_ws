@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(elvez_pkg)
+cmake_minimum_required(VERSION 3.0.2)
+project(path_planning_pkg)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+# add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -48,34 +48,16 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  jig_guide_data.msg
-  jig_tape_data.msg
-  spot_data.msg
-  pins_data.msg
-  operation_item.msg
+# add_message_files(
+#   FILES
+#   Message1.msg
 #   Message2.msg
-)
+# )
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  connector_info.srv
-  cable_info.srv
-  tray_info.srv
-  guide_info.srv
-  taping_spot_info.srv
-  jig_info.srv
-  next_operation.srv
-  resetTo.srv
-  index_operation.srv
-  all_operations.srv
-  all_cad_components.srv
-  tool_info.srv
-  guide_all_info.srv
-  #pathFinder.srv
-  #Pose_srv.srv
+  pathFinder.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -88,7 +70,7 @@ add_service_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
+  std_msgs
   geometry_msgs
 )
 
@@ -142,7 +124,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/elvez_pkg.cpp
+#   src/${PROJECT_NAME}/path_planning_pkg.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -153,7 +135,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/elvez_pkg_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/path_planning_pkg_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -179,7 +161,7 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
+# catkin_install_python(PROGRAMS
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
@@ -217,7 +199,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_elvez_pkg.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_path_planning_pkg.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

@@ -96,7 +96,7 @@ try:
         config2['x_offset'] = float(config1['offset_x'])/1000 #0.02
         config2['grasp_offset'] = float(config1['offset_grasp'])/1000 #0.005
         config2['force_offset'] = float(config1['offset_force'])/1000 #0.01
-        #pick_grasp_offset = float(config['offset_pick_grasp'])/1000 #0.015
+        #pick_grasp_offset = float(config1['offset_pick_grasp'])/1000 #0.015
         pick_grasp_offset = {}
         pick_grasp_offset['WH1'] = 0.015
         pick_grasp_offset['WH3'] = 0.0255
@@ -112,11 +112,15 @@ try:
         force_cable = {}
         force_connector = {}
         force_cable['WH1'] = float(config1['cable_tension_wh1']) #3.5N
+        force_cable['WH2'] = float(config1['cable_tension_wh1']) #3.5N
         force_cable['WH3'] = float(config1['cable_tension_wh3']) #3.5N
         force_connector['WH1'] = float(config1['connector_tension_wh1']) #5N
+        force_connector['WH2'] = float(config1['connector_tension_wh1']) #5N
         force_connector['WH3'] = float(config1['connector_tension_wh3']) #5N
         config2['force_cable'] = force_cable
         config2['force_connector'] = force_connector
+        force_limit_connector = 0
+        force_limit_cable = 0
 
         #Gripper parameters
         config2['open_distance'] = float(config1['gripper_open_dist']) #105
@@ -212,18 +216,14 @@ init_eef_srv(req)
 
 #################################### ROBOT OPERATIONS ####################################
 
-def EC(op, step2=0, config=[], route_group=""):
+def EC(op, step2=0, config=[], route_group="", route_arm=""):
 
         global grasping_cables
 
-        step1_increase = 0
         grasping_cables = False
         print("Pick connector")
         print("Step2: "+str(step2))
-        if op['spot']['side'] == "R":
-                pick_arm = "right"
-        else:
-                pick_arm = "left"
+        pick_arm = copy.deepcopy(route_arm)
         fingers_size = get_fingers_size(pick_arm)
         main_arm = 'arm_'+pick_arm
 
@@ -294,12 +294,100 @@ def EC(op, step2=0, config=[], route_group=""):
 
         if step2 == 7:
                 set_named_target('arms', "arms_platform_5")
-                move_group_async("arms")
-                step1_increase=1
+                step2+=move_group_async("arms")
                 rospy.sleep(0.5)
+        
+        if step2 == 8:
+                step2 = 0
                 #PUBLISH FEEDBACK AFTER FINISHING EACH OPERATION
         
-        return step2, step1_increase
+        return step2
+
+
+def PC(op, step2=0, config=[], route_group="", route_arm=""):
+        #global process_actionserver
+        global force_limit_cable
+        global force_limit_connector
+        global grasping_cables
+
+        force_limit_connector = config["force_connector"][op['label']]
+        force_limit_cable = config["force_connector"][op['label']]
+
+        grasping_cables = False
+        fingers_size = get_fingers_size(route_arm)
+
+        #IMPLEMENT ALGORITHM TO FIND A FREE PATH TO MOVE
+        if step2 == 0:
+                if op['label'] == "WH3":
+                        waypoints_PC03 = []
+                        init_pose = get_current_pose(route_group).pose
+                        free_path_pose1 = copy.deepcopy(init_pose)
+                        free_path_pose1.position.x -= 0.02
+                        free_path_pose2 = copy.deepcopy(free_path_pose1)
+                        free_path_pose2.position.y += 0.1895
+                        free_path_pose3 = copy.deepcopy(free_path_pose2)
+                        free_path_pose3.position.x += 0.212
+                        free_path_pose3.position.y += 0.03
+                        mold_up_forward = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2, ((op["spot"]['gap']/2)), op["spot"]["height"] + config['z_offset'], 0, 0, 0])
+                        mold_up_forward_corrected = correctPose(mold_up_forward, route_arm, rotate = True, ATC_sign = -1, routing_app = True, secondary_frame = True)
+                        mold_up_forward = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2, ((op["spot"]['gap']/2)), op["spot"]["height"], 0, 0, 0])
+                        mold_up_forward_corrected_shifted = copy.deepcopy(mold_up_forward_corrected)
+                        mold_up_forward_corrected_shifted.position.y = free_path_pose3.position.y
+                        mold_up_forward_corrected_shifted.position.x -= 0.05
+                        waypoints_PC03 = [init_pose, free_path_pose1, free_path_pose2, free_path_pose3, mold_up_forward_corrected_shifted, mold_up_forward_corrected]
+                        plan, success, motion_group_plan = compute_cartesian_path_velocity_control_arms_occlusions([waypoints_PC03], [config['fast_speed_execution']], arm_side=route_arm)
+                        if success:
+                                step2+=execute_plan_async(motion_group_plan, plan)
+                                rospy.sleep(1)
+                else:
+                        waypoints_PC01 = []
+                        init_pose = get_current_pose(route_group).pose
+                        free_path_pose1 = copy.deepcopy(init_pose)
+                        free_path_pose1.position.x -= 0.25
+                        mold_up_forward = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2, ((op["spot"]['gap']/2)), op["spot"]["height"] + 2*config['z_offset'], 0, 0, 0])
+                        mold_up_forward_corrected = correctPose(mold_up_forward, route_arm, rotate = True, ATC_sign = -1, routing_app = True, secondary_frame = True)
+                        free_path_pose1.position.z = mold_up_forward_corrected.position.z
+                        waypoints_PC01 = [init_pose, free_path_pose1, mold_up_forward_corrected]
+                        plan, success, motion_group_plan = compute_cartesian_path_velocity_control_arms_occlusions([waypoints_PC01], [config['fast_speed_execution']], arm_side=route_arm)
+                        print(success)
+                        print(motion_group_plan)
+                        if success:
+                                step2+=execute_plan_async(motion_group_plan, plan)
+                                rospy.sleep(1)
+        
+        if step2 == 1:
+                waypoints_PC2 = []
+                init_pose = get_current_pose(route_group).pose
+                waypoints_PC2.append(init_pose)
+                mold_forward = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2, ((op["spot"]['gap']/2)), 0, 0, 0, 0])
+                waypoints_PC2.append(correctPose(mold_forward, route_arm, rotate = True, ATC_sign = -1, routing_app = True, secondary_frame = True))
+                #visualize_keypoints_simple(waypoints_PC2, '/base_link')
+                plan, success = compute_cartesian_path_velocity_control([waypoints_PC2], [config['slow_speed_execution']], arm_side=route_arm)
+                if success:
+                        step2+=execute_plan_async(route_group, plan)
+                rospy.sleep(1)
+
+        if step2 == 2:
+                waypoints_PC3 = []
+                init_pose = get_current_pose(route_group).pose
+                waypoints_PC3.append(init_pose)
+                #Connector insertion params
+                combs_width = 0.001
+                mold_width = 0.001
+                extra_pull = 0.01
+                pull_pose = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2+pick_grasp_offset[op["spot"]["name"]]+combs_width-mold_width+extra_pull, ((op["spot"]['gap']/2)), 0, 0, 0, 0])
+                waypoints_PC3.append(correctPose(pull_pose, route_arm, rotate = True, ATC_sign = -1, routing_app = True, secondary_frame = True))
+                plan, success = compute_cartesian_path_velocity_control([waypoints_PC3], [config['speed_tension']], arm_side=route_arm)
+                if success:
+                        step2+=execute_force_control(group = route_group, plan = plan, limit = force_limit_connector, force_active=config['force_control_active'])
+                rospy.sleep(0.5)
+                grasping_cables = True
+
+        if step2 == 3:
+                step2 = 0
+                #process_actionserver.publish_feedback()
+        
+        return step2
 
 
 ########################## ADVANCED MANIPULATION FUNCTIONS #######################################
@@ -340,11 +428,23 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
                 msg = float_list()
                 for wp in list_wp:
                         msg.data.append(wp)
-                #msg.data = list_wp
-                req.waypoints_list.append(msg), 
+                req.waypoints_list.append(msg) 
         req.EE_speed = EE_speed; req.EE_ang_speed = EE_ang_speed; req.arm_side = arm_side; req.max_linear_accel = max_linear_accel; req.max_ang_accel = max_ang_accel; req.step = step
         resp = compute_path_srv(req)
         return resp.plan, resp.success
+
+def compute_cartesian_path_velocity_control_arms_occlusions(waypoints_list, EE_speed, EE_ang_speed = [], arm_side = "left", max_linear_accel = 200.0, max_ang_accel = 140.0, step = 0.002):
+        rospy.wait_for_service('/adv_manip/compute_cartesian_path_velocity_control_arms_occlusions')
+        compute_path_occ_srv = rospy.ServiceProxy('/adv_manip/compute_cartesian_path_velocity_control_arms_occlusions', ComputePath)
+        req = ComputePathRequest()
+        for list_wp in waypoints_list:
+                msg = float_list()
+                for wp in list_wp:
+                        msg.data.append(wp)
+                req.waypoints_list.append(msg) 
+        req.EE_speed = EE_speed; req.EE_ang_speed = EE_ang_speed; req.arm_side = arm_side; req.max_linear_accel = max_linear_accel; req.max_ang_accel = max_ang_accel; req.step = step
+        resp = compute_path_occ_srv(req)
+        return resp.plan, resp.success, resp.group
 
 """
 def move_group_async(group):
@@ -404,6 +504,27 @@ def execute_plan_async(group, plan):
         while not async_plan_done:
                 rospy.sleep(0.05)
         async_plan_done = False
+        return step_inc_fb
+
+force_plan_done=False
+def execute_force_control_callback(fb):
+        global force_plan_done
+        global step_inc_fb
+        if fb.done:
+                force_plan_done = True
+                step_inc_fb = fb.step_inc
+
+def execute_force_control(group, plan, limit, force_active = True):
+        global force_plan_done
+        global step_inc_fb
+        client=actionlib.SimpleActionClient('/adv_manip/execute_force_control', ExecutePlanAction)
+        client.wait_for_server()
+        goal = ExecutePlanGoal()
+        goal.group = group; goal.plan = plan; goal.force_active = force_active; goal.force_limit = limit
+        client.send_goal(goal, feedback_cb=execute_force_control_callback)
+        while not force_plan_done:
+                rospy.sleep(0.05)
+        force_plan_done = False
         return step_inc_fb
 
 def get_fingers_size(side):
@@ -525,13 +646,12 @@ def execute_operation(op):
         if op['type'] == "EC":
                 PC_op = get_next_connector_info(op)
                 update_route_arm_info(PC_op)
-                step2, step1_inc = EC(op, step2, config2, route_group)              
-
-        """    
+                step2 = EC(op, step2, config2, route_group, route_arm)              
+    
         elif op['type'] == "PC":
                 update_route_arm_info(op)
-                simplified_PC(op)
-                
+                step2 = PC(op, step2, config2, route_group, route_arm)
+        """                
         elif op['type'] == "RC":
                 PC_op = get_last_connector_info(op)
                 update_route_arm_info(PC_op)
@@ -554,7 +674,7 @@ def execute_operation(op):
                 PC_op = get_last_connector_info(op)
                 tape(op["spot"][:2],op["spot"][2])
         """
-        step1 += step1_inc
+
 
 #CAD Platform info
 rospy.wait_for_service('ELVEZ_platform_handler/all_operations')
@@ -590,6 +710,7 @@ for ops in opsResult.data:
                 guideResult = my_service(guideReq)
                 guide = guideResult.data
                 ops_temp['spot'] = {'name': str(ops.label[0]), 'jig': ops.spot[0].jig, 'id': ops.spot[0].id, 'side': ops.spot[0].side, 'pose_corner': guide.key_corner_frame, 'gap': guide.key_gap, 'width': guide.key_length, 'height': guide.key_height, 'height_corner': guide.key_height_corner, 'collisions': guide.collisions, 'dimensions': guide.dimensions}
+                ops_temp['label'] = str(ops.label[0])
                 last_PC_spot = copy.deepcopy(ops_temp['spot'])
                 ops_info_text_temp = 'Place connector ' + str(ops.label[0]) + " in " + str(ops.spot[0].jig)
 
@@ -694,6 +815,9 @@ for ops in opsResult.data:
 
 #print(ops_info)
 
-step1 = 0
+step1 = 1
 step2 = 0
+set_named_target('arms', "arms_platform_5")
+move_group_async("arms")
+rospy.sleep(0.5)
 execute_operation(ops_info[step1])

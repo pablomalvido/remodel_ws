@@ -1,6 +1,8 @@
 #Goal
 string group
 moveit_msgs/RobotTrajectory plan
+bool force_active
+float32 force_limit
 ---------------
 #Result
 bool success

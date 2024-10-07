@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="path_finder_node" pkg="path_planning_pkg" type="rrt_connect.py" output="screen">
+    </node>
+</launch>  

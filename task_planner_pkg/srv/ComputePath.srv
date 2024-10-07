@@ -9,3 +9,4 @@ float64 step
 ---------------
 moveit_msgs/RobotTrajectory plan
 bool success
+string group

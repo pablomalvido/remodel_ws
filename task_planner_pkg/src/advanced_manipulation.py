@@ -3,8 +3,6 @@ import sys
 import os
 import copy
 import rospy
-import  rospkg
-import csv
 import PyKDL 
 import moveit_commander
 from moveit_msgs.msg import *
@@ -40,6 +38,7 @@ from utils import *
 
 
 rospy.init_node('adv_manip_node', anonymous=True)
+logs_publisher = rospy.Publisher('/UI/logs', String, queue_size=1)
 listener = tf.TransformListener()
 real_robot = False
 stop_mov = False
@@ -732,6 +731,8 @@ rospy.Service("/adv_manip/def_EEF", DefEEF, def_EEF)
 
 def def_ATC(req):
     global ATC1
+    global max_arms_dist
+    max_arms_dist = frame_to_pose(EEF_list[req.left_tool].EE_end_frame).position.x + frame_to_pose(EEF_list[req.right_tool].EE_end_frame).position.x + EEF_list[req.left_tool].fingers_dim[0]/2 + EEF_list[req.right_tool].fingers_dim[0]/2 + 0.05
     ATC_tools_list = []
     for tool in req.ATC_tools:
            ATC_tools_list.append(EEF_list[tool])
@@ -759,6 +760,7 @@ def go(req):
 rospy.Service("/adv_manip/go", MotionGroupsCommand, go)
 
 def get_current_pose_srv(req):
+    test_pose = motion_groups[motion_groups_map[req.group]].get_current_pose()
     resp = GetGroupPoseResponse()
     resp.poseSt = motion_groups[motion_groups_map[req.group]].get_current_pose()
     return resp
@@ -779,8 +781,11 @@ rospy.Service("/adv_manip/correct_pose", GetCorrectPose, correctPoseSrv)
 status_movement = 0
 status_movement2 = 0
 stop_mov = False
+force_limit = 0
+force_controlled = False
+stop_mov_force = False
 
-#ROBOT SAFETY
+#SUBSCRIBERS
 def callback_robot_status(msg):
     global stop_mov
     if str(msg.e_stopped) == "val: 1":
@@ -804,7 +809,62 @@ def callback_status_exec_traj(status):
  
 subsMotionStatus2 = rospy.Subscriber('/execute_trajectory/status', GoalStatusArray, callback_status_exec_traj) 
 
+def callback_force(force):
+        global force_limit
+        global force_controlled
+        global stop_mov_force
+        if force_controlled:
+
+                Fxy = math.sqrt(force.Fx**2 + force.Fy**2)
+                if force_limit < Fxy and not stop_mov_force:
+                        print("Force is too high, stop the motion")
+                        print(force)
+                        stop_mov_force = True
+                        motion_groups['arm_left'].stop()
+                        motion_groups['arm_right'].stop()
+
+subsForce = rospy.Subscriber('/left_norbdo/forces', forces, callback_force)
+subsForce = rospy.Subscriber('/right_norbdo/forces', forces, callback_force)  
+
 #Motion functions
+def execute_force_control(group, plan):
+        global status_movement2
+        global stop_mov
+        global stop_mov_force
+
+        print("ENTERING FORCE CONTROL FUNCTION")
+        step_increase = 0
+        msg_log = String()
+        msg_log.data = str(group) + " moving with force control..."
+        logs_publisher.publish(msg_log)
+
+        motion_groups[group].execute(plan, wait=False)
+        while (status_movement2==3 or status_movement2==2 or status_movement2==4) and not stop_mov and not stop_mov_force: #Before the motion initializes (3: SUCCEEDED, 2: PREEMTED)
+                rospy.sleep(0.01)
+        print("STATUS MOVEMENT FORCE CONTROL: " + str(status_movement2))
+        print("STOP MOV FORCE: " + str(stop_mov_force))
+        while (status_movement2==0 or status_movement2==1) and not stop_mov and not stop_mov_force: #Stop until the motion is completed
+                rospy.sleep(0.05)
+        print("STATUS MOVEMENT FORCE CONTROL: " + str(status_movement2))
+        if not stop_mov:
+                step_increase = 1
+        #process_actionserver.publish_feedback()
+        stop_mov_force = False
+        if status_movement2==3: #SUCCEEDED
+                msg_log.data = "Successful motion, not force limit detected"
+                logs_publisher.publish(msg_log)
+                return step_increase, True
+        elif status_movement2==5: #REJECTED
+                msg_log.data = "Failure motion"
+                logs_publisher.publish(msg_log)
+                return step_increase, False
+        else:
+                msg_log.data = "Successful motion, force limit detected"
+                logs_publisher.publish(msg_log)
+                print("Motion stopped because the force limit has been reached")
+                return step_increase, True
+        
+
 def move_group_async(group):
     global status_movement
     global stop_mov
@@ -1056,7 +1116,7 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
                 arm = motion_groups['arm_left']
                 fkln = ['arm_left_link_7_t'] #Modify with the name of the final link of the left arm
         else:
-                arm = motion_groups['arm_left']
+                arm = motion_groups['arm_right']
                 fkln = ['arm_right_link_7_t'] #Modify with the name of the final link of the right arm
 
         EE_ang_speed = []
@@ -2129,13 +2189,6 @@ def compute_cartesian_path_velocity_control_arms_occlusions(waypoints_list, EE_s
                 for wp_i in wp_list:
                         all_wp.append(wp_i)
 
-        # print("##############POSES###############")
-        # print(arm1_pose)
-        # print(arm2_pose)
-        # print(all_wp[0])
-        # print(all_wp[-1])
-        # print("##################################")
-
         initial_distance = compute_distance_xy(arm1_pose,arm2_pose)
         for i in range(len(all_wp)):
                 if compute_distance_xy(all_wp[i],arm2_pose) < min(max_arms_dist, initial_distance):
@@ -2173,6 +2226,7 @@ def compute_cartesian_path_velocity_control_arms_occlusions(waypoints_list, EE_s
                         initial_pose2_TG = frame_to_pose(get_inverse_frame(frame_BT) * pose_to_frame(arm2_pose))
                         final_pose2_TG = copy.deepcopy(initial_pose2_TG)
                         if arm_side == 'left':
+                                print(max_arms_dist)
                                 final_pose2_TG.position.y = final_pose1_TG.position.y - (max_arms_dist + 0.1)
                         elif arm_side == 'right':
                                 final_pose2_TG.position.y = final_pose1_TG.position.y + (max_arms_dist + 0.1)
@@ -2198,8 +2252,7 @@ def compute_cartesian_path_velocity_control_arms_occlusions(waypoints_list, EE_s
                                         speed_left = [max(EE_speed)]
                                 success, wp_left_interpolated = interpolate_trajectory(initial_pose = arm2_pose, final_pose = final_pose2_BG, step_pos_min = 0.02, step_deg_min = 5, n_points_max = 20)
                                 wp_left = [wp_left_interpolated]
-                                #wp_left = [[arm2_pose, final_pose2_BG]]
-                                #visualize_keypoints_simple(wp_right[0] + wp_left[0])
+
                         plan, success = dual_arm_cartesian_plan(wp_left, speed_left, wp_right, speed_right, ATC1= ATC1, sync_policy=2)
                 
         else:
@@ -2230,6 +2283,27 @@ def compute_cartesian_path_velocity_control_srv(req):
         return resp
 
 rospy.Service("/adv_manip/compute_cartesian_path_velocity_control", ComputePath, compute_cartesian_path_velocity_control_srv)
+
+
+def compute_cartesian_path_velocity_control_arms_occlusions_srv(req):
+        #Default values
+        if req.arm_side == "":
+               req.arm_side = "left"
+        if req.max_linear_accel == 0:
+               req.max_linear_accel = 200.0
+        if req.max_ang_accel == 0:
+               req.max_ang_accel = 140.0
+        if req.step == 0:
+               req.step = 0.002
+        waypoints_list = []
+        for list_i in req.waypoints_list:
+               waypoints_list.append(list_i.data)
+        resp = ComputePathResponse()     
+        plan, success, group = compute_cartesian_path_velocity_control_arms_occlusions(waypoints_list, req.EE_speed, req.EE_ang_speed, req.arm_side, req.max_linear_accel, req.max_ang_accel, False, req.step)
+        resp.plan = plan; resp.success = success; resp.group = group
+        return resp
+
+rospy.Service("/adv_manip/compute_cartesian_path_velocity_control_arms_occlusions", ComputePath, compute_cartesian_path_velocity_control_arms_occlusions_srv)
 
 """
 def move_group_async_srv(req):
@@ -2273,6 +2347,32 @@ def async_plan_goal_callback(goal):
 exe_plan_async_action = actionlib.SimpleActionServer("adv_manip/execute_plan_async", ExecutePlanAction, async_plan_goal_callback, False)
 exe_plan_async_action.start()
 
+def execute_force_goal_callback(goal):
+        global exe_plan_force_action
+        global force_limit
+        global stop_mov_force
+        global force_controlled
+        fb = ExecutePlanFeedback()
+        res = ExecutePlanResult()
+        if goal.force_active:
+                rospy.wait_for_service('/right_norbdo/tare')
+                tare_forces_srvR = rospy.ServiceProxy('right_norbdo/tare', Trigger)
+                tare_forces_srvR(TriggerRequest())
+                tare_forces_srvL = rospy.ServiceProxy('left_norbdo/tare', Trigger)
+                tare_forces_srvL(TriggerRequest())
+        stop_mov_force = False #RESET before abilitating
+        force_limit = goal.force_limit
+        force_controlled = goal.force_active #Generally disabled in simulation mode
+        fb.step_inc, success = execute_force_control(motion_groups_map[goal.group], goal.plan)
+        force_controlled = False
+        fb.done = True
+        exe_plan_force_action.publish_feedback(fb)
+        res.success = True
+        exe_plan_force_action.set_succeeded(res)
+
+exe_plan_force_action = actionlib.SimpleActionServer("adv_manip/execute_force_control", ExecutePlanAction, execute_force_goal_callback, False)
+exe_plan_force_action.start()
+
 def get_fingers_size(req):
         global ATC1
         resp = FingersDimResponse()
@@ -2285,5 +2385,28 @@ def get_fingers_size(req):
 
 rospy.Service("/adv_manip/get_fingers_size", FingersDim, get_fingers_size)
 
+br = tf.TransformBroadcaster() 
+
+def broadcastTransform(br, frame, frame_id, parent_frame, time=rospy.get_rostime()): 
+    """
+    Get the tf between 2 frames
+    """
+    br.sendTransform((frame.p.x(), frame.p.y(), frame.p.z()), 
+        frame.M.GetQuaternion(), 
+        time, 
+        frame_id, 
+        parent_frame)
+
+def visualize_keypoints_simple(poses, parent_frame = "/torso_base_link"):
+        """
+        Visualize a list of poses [Pose] with respect to the parent_frame
+        """
+        while not rospy.is_shutdown():
+                number = 2000
+                for waypoint in poses:
+                        current_time = rospy.get_rostime()
+                        waypoint_frame = pose_to_frame(waypoint)
+                        broadcastTransform(br, waypoint_frame, str(number), parent_frame, time=current_time)
+                        number += 1
 
 rospy.spin()
