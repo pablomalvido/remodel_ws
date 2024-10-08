@@ -9,7 +9,7 @@ import os
 import sys
 import env
 
-matplotlib.use('agg')
+matplotlib.use('Agg')
 
 #sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
 #                "/../../Sampling_based_Planning/")
@@ -125,8 +125,8 @@ class Plotting:
         plt.axis("equal")
         plt.axis(adjustable="datalim")
         #plt.axis(xbound=(-50,50),ybound=(45,95))
-        plt.xlim(-42,42)
-        plt.ylim(45,96)
+        plt.xlim(-60,60)
+        plt.ylim(40,100)
 
     @staticmethod
     def plot_visited(nodelist, animation):
@@ -173,8 +173,8 @@ class Plotting:
             plt.plot([x[0] for x in path], [x[1] for x in path], '-r', linewidth=2, label="Connector path")
             #plt.pause(0.01)
         #plt.show()
-        plt.plot(xI[0], xI[1], color="b", marker="s", linewidth=3, markersize=10) #Start
-        plt.plot(xG[0], xG[1], color="#008800", marker="s", linewidth=3, markersize=10) #Goal
+        plt.plot(xI[0], xI[1], color="b", marker="s", linewidth=0, markersize=4) #Start
+        plt.plot(xG[0], xG[1], color="#008800", marker="s", linewidth=0, markersize=4) #Goal
 
     @staticmethod
     def plot_path_EE(path, xI, xG, title="path"):
@@ -183,10 +183,11 @@ class Plotting:
             plt.plot([x[0] for x in path], [x[1] for x in path], '--k', linewidth=2, label="EE path")
             plt.pause(0.01)
 
-        plt.plot(xI[0], xI[1], color="b", marker="s", linewidth=0, label="Start point", markersize=10) #Start
-        plt.plot(xG[0], xG[1], color="#008800", marker="s", linewidth=0, label="Target point", markersize=10) #Goal
+        plt.plot(xI[0], xI[1], color="b", marker="s", linewidth=0, label="Start point", markersize=4) #Start
+        plt.plot(xG[0], xG[1], color="#008800", marker="s", linewidth=0, label="Target point", markersize=4) #Goal
 
-        plt.legend(loc=2, fontsize=22)
-        plt.tick_params(labelsize=22)
+        plt.legend(loc=2, fontsize=8)
+        plt.tick_params(labelsize=10)
         #plt.show()
         plt.savefig(os.path.dirname(os.path.realpath(__file__)) + "/../plots/" + str(title) + ".pdf")
+        plt.close()

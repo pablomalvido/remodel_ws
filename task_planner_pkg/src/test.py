@@ -16,6 +16,7 @@ from task_planner_pkg.srv import *
 import actionlib
 from task_planner_pkg.msg import EEFActAction, EEFActResult, EEFActFeedback, EEFActGoal
 from task_planner_pkg.msg import ExecutePlanAction, ExecutePlanGoal, ExecutePlanFeedback
+from path_planning_pkg.srv import *
 
 rospack = rospkg.RosPack()
 rospy.init_node('test_node', anonymous=True)
@@ -310,6 +311,7 @@ def PC(op, step2=0, config=[], route_group="", route_arm=""):
         global force_limit_connector
         global grasping_cables
 
+        print("PC")
         force_limit_connector = config["force_connector"][op['label']]
         force_limit_cable = config["force_connector"][op['label']]
 
@@ -318,42 +320,22 @@ def PC(op, step2=0, config=[], route_group="", route_arm=""):
 
         #IMPLEMENT ALGORITHM TO FIND A FREE PATH TO MOVE
         if step2 == 0:
-                if op['label'] == "WH3":
-                        waypoints_PC03 = []
-                        init_pose = get_current_pose(route_group).pose
-                        free_path_pose1 = copy.deepcopy(init_pose)
-                        free_path_pose1.position.x -= 0.02
-                        free_path_pose2 = copy.deepcopy(free_path_pose1)
-                        free_path_pose2.position.y += 0.1895
-                        free_path_pose3 = copy.deepcopy(free_path_pose2)
-                        free_path_pose3.position.x += 0.212
-                        free_path_pose3.position.y += 0.03
-                        mold_up_forward = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2, ((op["spot"]['gap']/2)), op["spot"]["height"] + config['z_offset'], 0, 0, 0])
-                        mold_up_forward_corrected = correctPose(mold_up_forward, route_arm, rotate = True, ATC_sign = -1, routing_app = True, secondary_frame = True)
-                        mold_up_forward = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2, ((op["spot"]['gap']/2)), op["spot"]["height"], 0, 0, 0])
-                        mold_up_forward_corrected_shifted = copy.deepcopy(mold_up_forward_corrected)
-                        mold_up_forward_corrected_shifted.position.y = free_path_pose3.position.y
-                        mold_up_forward_corrected_shifted.position.x -= 0.05
-                        waypoints_PC03 = [init_pose, free_path_pose1, free_path_pose2, free_path_pose3, mold_up_forward_corrected_shifted, mold_up_forward_corrected]
-                        plan, success, motion_group_plan = compute_cartesian_path_velocity_control_arms_occlusions([waypoints_PC03], [config['fast_speed_execution']], arm_side=route_arm)
-                        if success:
-                                step2+=execute_plan_async(motion_group_plan, plan)
-                                rospy.sleep(1)
-                else:
-                        waypoints_PC01 = []
-                        init_pose = get_current_pose(route_group).pose
-                        free_path_pose1 = copy.deepcopy(init_pose)
-                        free_path_pose1.position.x -= 0.25
-                        mold_up_forward = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2, ((op["spot"]['gap']/2)), op["spot"]["height"] + 2*config['z_offset'], 0, 0, 0])
-                        mold_up_forward_corrected = correctPose(mold_up_forward, route_arm, rotate = True, ATC_sign = -1, routing_app = True, secondary_frame = True)
-                        free_path_pose1.position.z = mold_up_forward_corrected.position.z
-                        waypoints_PC01 = [init_pose, free_path_pose1, mold_up_forward_corrected]
-                        plan, success, motion_group_plan = compute_cartesian_path_velocity_control_arms_occlusions([waypoints_PC01], [config['fast_speed_execution']], arm_side=route_arm)
-                        print(success)
-                        print(motion_group_plan)
-                        if success:
-                                step2+=execute_plan_async(motion_group_plan, plan)
-                                rospy.sleep(1)
+                waypoints_PC1 = [get_current_pose(route_group).pose]
+                free_path, success = find_path(arm_side=route_arm, end_guide=op['spot']['jig'], wh=op['label'][-1], offset_z=(3*config['z_offset']))
+                for p in free_path:
+                        if compute_distance_xy(p, op['spot']['center_pose']) < 0.1:
+                                print("CLOSE")    
+                                print(compute_distance_xy(p, op['spot']['center_pose']))
+                                break
+                        print(compute_distance_xy(p, op['spot']['center_pose']))
+                        waypoints_PC1.append(correctPose(p, route_arm, rotate = True, ATC_sign = -1, routing_app = True, secondary_frame = True))    
+                mold_up_forward = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2, ((op["spot"]['gap']/2)), op["spot"]["height"] + 2*config['z_offset'], 0, 0, 0])
+                waypoints_PC1.append(correctPose(mold_up_forward, route_arm, rotate = True, ATC_sign = -1, routing_app = True, secondary_frame = True))
+                #visualize_keypoints_simple(waypoints_PC1, '/base_link')
+                plan, success, motion_group_plan = compute_cartesian_path_velocity_control_arms_occlusions([waypoints_PC1], [config['fast_speed_execution']], arm_side=route_arm)
+                if success:
+                        step2+=execute_plan_async(motion_group_plan, plan)
+                        rospy.sleep(0.5)
         
         if step2 == 1:
                 waypoints_PC2 = []
@@ -361,7 +343,6 @@ def PC(op, step2=0, config=[], route_group="", route_arm=""):
                 waypoints_PC2.append(init_pose)
                 mold_forward = get_shifted_pose(op["spot"]["pose_corner"], [op["spot"]['width']+config['grasp_offset']+fingers_size[0]/2, ((op["spot"]['gap']/2)), 0, 0, 0, 0])
                 waypoints_PC2.append(correctPose(mold_forward, route_arm, rotate = True, ATC_sign = -1, routing_app = True, secondary_frame = True))
-                #visualize_keypoints_simple(waypoints_PC2, '/base_link')
                 plan, success = compute_cartesian_path_velocity_control([waypoints_PC2], [config['slow_speed_execution']], arm_side=route_arm)
                 if success:
                         step2+=execute_plan_async(route_group, plan)
@@ -557,6 +538,15 @@ def actuate_grippers(distance, speed, arm, config, grasp=False):
 def actuate_gun():
         actuate_eef(1)
 
+def find_path(arm_side, end_guide, wh, offset_z, interpolate_z = False):
+        print("finding")
+        rospy.wait_for_service('/adv_manip/find_free_path_rrt')
+        find_path_srv = rospy.ServiceProxy('/adv_manip/find_free_path_rrt', pathFinder)
+        req = pathFinderRequest()
+        req.arm = arm_side; req.end_guide = end_guide; req.WH = wh; req.offset_z = offset_z; req.interpolate_z = interpolate_z; req.show = False; req.target_provided = False
+        resp = find_path_srv(req)
+        return resp.path, resp.success
+
 br = tf.TransformBroadcaster() 
 
 def broadcastTransform(br, frame, frame_id, parent_frame, time=rospy.get_rostime()): 
@@ -569,7 +559,7 @@ def broadcastTransform(br, frame, frame_id, parent_frame, time=rospy.get_rostime
         frame_id, 
         parent_frame)
 
-def visualize_keypoints_simple(poses, parent_frame = "/torso_base_link"):
+def visualize_keypoints_simple(poses, parent_frame = "/base_link"):
         """
         Visualize a list of poses [Pose] with respect to the parent_frame
         """
@@ -699,6 +689,7 @@ for ops in opsResult.data:
                 guideResult = my_service(guideReq)
                 guide = guideResult.data
                 ops_temp['spot'] = {'name': str(ops.label[0]), 'jig': ops.spot[0].jig, 'id': ops.spot[0].id, 'side': ops.spot[0].side, 'pose_corner': guide.key_corner_frame, 'gap': guide.key_gap, 'width': guide.key_length, 'height': guide.key_height, 'dimensions': guide.dimensions}
+                ops_temp['label'] = str(ops.label[0])
                 ops_info_text_temp = 'Pick ' + str(ops.label[0]) + " from " + str(ops.spot[0].jig)
 
         elif ops.type == "PC":
@@ -709,7 +700,7 @@ for ops in opsResult.data:
                 guideReq.guide = ops.spot[0].id
                 guideResult = my_service(guideReq)
                 guide = guideResult.data
-                ops_temp['spot'] = {'name': str(ops.label[0]), 'jig': ops.spot[0].jig, 'id': ops.spot[0].id, 'side': ops.spot[0].side, 'pose_corner': guide.key_corner_frame, 'gap': guide.key_gap, 'width': guide.key_length, 'height': guide.key_height, 'height_corner': guide.key_height_corner, 'collisions': guide.collisions, 'dimensions': guide.dimensions}
+                ops_temp['spot'] = {'name': str(ops.label[0]), 'jig': ops.spot[0].jig, 'id': ops.spot[0].id, 'side': ops.spot[0].side, 'pose_corner': guide.key_corner_frame, 'center_pose': guide.key_center_frame, 'gap': guide.key_gap, 'width': guide.key_length, 'height': guide.key_height, 'height_corner': guide.key_height_corner, 'collisions': guide.collisions, 'dimensions': guide.dimensions}
                 ops_temp['label'] = str(ops.label[0])
                 last_PC_spot = copy.deepcopy(ops_temp['spot'])
                 ops_info_text_temp = 'Place connector ' + str(ops.label[0]) + " in " + str(ops.spot[0].jig)
@@ -820,4 +811,5 @@ step2 = 0
 set_named_target('arms', "arms_platform_5")
 move_group_async("arms")
 rospy.sleep(0.5)
+print("READY")
 execute_operation(ops_info[step1])

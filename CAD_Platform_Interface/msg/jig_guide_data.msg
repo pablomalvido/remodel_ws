@@ -5,8 +5,10 @@ float64 key_height
 float64 key_height_corner
 geometry_msgs/Pose key_corner_frame
 geometry_msgs/Pose key_center_frame
+geometry_msgs/Pose jig_corner_frame
+geometry_msgs/Pose jig_center_frame
+float64[] jig_dimensions
 float64[] collision_dimensions
+float64[] dimensions
 geometry_msgs/Pose collision_corner_frame
 float64[] collisions
-float64[] dimensions
-

@@ -13,12 +13,12 @@ class InputFilesDataCollector(object):
     self.dict_platform = self._createPlatformDict(self.platform_file_path)
 
     if wri_file_2 != "":
-	    self.combs_file_path = os.path.join(folder_path, wri_file_2)
-	    self.dict_combs = self._createPlatformDict(self.combs_file_path)
+      self.combs_file_path = os.path.join(folder_path, wri_file_2)
+      self.dict_combs = self._createPlatformDict(self.combs_file_path)
 
     if wri_file_3 != "":
-	    self.ATC_file_path = os.path.join(folder_path, wri_file_3)
-	    self.dict_combs = self._createPlatformDict(self.ATC_file_path)
+      self.ATC_file_path = os.path.join(folder_path, wri_file_3)
+      self.dict_combs = self._createPlatformDict(self.ATC_file_path)
      
     self.jigs_file_path = os.path.join(folder_path, jigs_file)
     self.dict_jigs = self._createJigsDict(self.jigs_file_path)
@@ -61,10 +61,15 @@ class InputFilesDataCollector(object):
         dic["xdim"] = float(code.get('xdim'))/1000
         dic["ydim"] = float(code.get('ydim'))/1000
         dic["zdim"] = float(code.get('zdim'))/1000
-	dic["xcol1"] = float(code.get('xcol1'))/1000
+        dic["xcol1"] = float(code.get('xcol1'))/1000
         dic["xcol2"] = float(code.get('xcol2'))/1000
         dic["ycol1"] = float(code.get('ycol1'))/1000
-	dic["ycol2"] = float(code.get('ycol2'))/1000
+        dic["ycol2"] = float(code.get('ycol2'))/1000
+        dic["xcolli"] = float(code.get('xcolli'))/1000
+        dic["ycolli"] = float(code.get('ycolli'))/1000
+        tf_center_jig = PyKDL.Frame() 
+        tf_center_jig.p = PyKDL.Vector(float(code.get('xcenter'))/1000, float(code.get('ycenter'))/1000, 0) 
+        dic["center_jig"] = tf_center_jig
 
         for guide in code.findall('guide'): 
           key_dict = {}
@@ -172,7 +177,7 @@ class InputFilesDataCollector(object):
         dic["xdim"] = float(code.get('xdim'))/1000
         dic["ydim"] = float(code.get('ydim'))/1000
         dic["zdim"] = float(code.get('zdim'))/1000
-	dic["trays"] = {}
+        dic["trays"] = {}
 
         for tray in code.findall('tray'): 
           tray_dict = {}
@@ -215,10 +220,10 @@ class InputFilesDataCollector(object):
         dic["xdim"] = float(code.get('xdim'))/1000
         dic["ydim"] = float(code.get('ydim'))/1000
         dic["zdim"] = float(code.get('zdim'))/1000
-	dic["xcol1"] = float(code.get('xcol1'))/1000
+        dic["xcol1"] = float(code.get('xcol1'))/1000
         dic["xcol2"] = float(code.get('xcol2'))/1000
         dic["ycol1"] = float(code.get('ycol1'))/1000
-	dic["ycol2"] = float(code.get('ycol2'))/1000
+        dic["ycol2"] = float(code.get('ycol2'))/1000
 
         for guide in code.findall('guide'): 
           key_dict = {}
@@ -289,84 +294,84 @@ class InputFilesDataCollector(object):
         dic["xdim"] = float(code.get('xdim'))/1000
         dic["ydim"] = float(code.get('ydim'))/1000
         dic["zdim"] = float(code.get('zdim'))/1000
-	dic["tool"] = code.get('tool')
-	for dim in code.findall('tool_dim'):
-		dic["x_tool"] = float(dim.get('x'))/1000
-		dic["y_tool"] = float(dim.get('y'))/1000
-		dic["z_tool"] = float(dim.get('z'))/1000
+        dic["tool"] = code.get('tool')
+        for dim in code.findall('tool_dim'):
+          dic["x_tool"] = float(dim.get('x'))/1000
+          dic["y_tool"] = float(dim.get('y'))/1000
+          dic["z_tool"] = float(dim.get('z'))/1000
 
         for key in code.findall('tool_base'):
-		for pos in key.findall('pos'): 
-			if pos.get('name') == 'x': 
-		        	x = float(pos.text)/1000
-			if pos.get('name') == 'y': 
-				y = float(pos.text)/1000
-			if pos.get('name') == 'z': 
-		        	z = float(pos.text)/1000
-		for rot in key.findall('rot'): 
-			if rot.get('name') == 'R': 
-				R = float(rot.text) 
-			if rot.get('name') == 'P': 
-				P = float(rot.text) 
-			if rot.get('name') == 'Y': 
-		        	Y = float(rot.text) 
-		tf_base = PyKDL.Frame() 
-		tf_base.p = PyKDL.Vector(x, y, z) 
-		tf_base.M.DoRotX(R) 
-		tf_base.M.DoRotY(P) 
-		tf_base.M.DoRotZ(Y)
-	dic['frame_base'] = tf_base
+          for pos in key.findall('pos'): 
+            if pos.get('name') == 'x': 
+              x = float(pos.text)/1000
+            if pos.get('name') == 'y': 
+              y = float(pos.text)/1000
+            if pos.get('name') == 'z': 
+              z = float(pos.text)/1000
+          for rot in key.findall('rot'): 
+            if rot.get('name') == 'R': 
+              R = float(rot.text) 
+            if rot.get('name') == 'P': 
+              P = float(rot.text) 
+            if rot.get('name') == 'Y': 
+              Y = float(rot.text) 
+          tf_base = PyKDL.Frame() 
+          tf_base.p = PyKDL.Vector(x, y, z) 
+          tf_base.M.DoRotX(R) 
+          tf_base.M.DoRotY(P) 
+          tf_base.M.DoRotZ(Y)
+          dic['frame_base'] = tf_base
 
-	for key in code.findall('tool_end'):
-		for pos in key.findall('pos'): 
-			if pos.get('name') == 'x': 
-		        	x = float(pos.text)/1000
-			if pos.get('name') == 'y': 
-				y = float(pos.text)/1000
-			if pos.get('name') == 'z': 
-		        	z = float(pos.text)/1000
-		for rot in key.findall('rot'): 
-			if rot.get('name') == 'R': 
-				R = float(rot.text) 
-			if rot.get('name') == 'P': 
-				P = float(rot.text) 
-			if rot.get('name') == 'Y': 
-		        	Y = float(rot.text) 
-		tf_end = PyKDL.Frame() 
-		tf_end.p = PyKDL.Vector(x, y, z) 
-		tf_end.M.DoRotX(R) 
-		tf_end.M.DoRotY(P) 
-		tf_end.M.DoRotZ(Y)
-	dic['frame_end'] = tf_end
+        for key in code.findall('tool_end'):
+          for pos in key.findall('pos'): 
+            if pos.get('name') == 'x': 
+              x = float(pos.text)/1000
+            if pos.get('name') == 'y': 
+              y = float(pos.text)/1000
+            if pos.get('name') == 'z': 
+              z = float(pos.text)/1000
+          for rot in key.findall('rot'): 
+            if rot.get('name') == 'R': 
+              R = float(rot.text) 
+            if rot.get('name') == 'P': 
+              P = float(rot.text) 
+            if rot.get('name') == 'Y': 
+              Y = float(rot.text) 
+          tf_end = PyKDL.Frame() 
+          tf_end.p = PyKDL.Vector(x, y, z) 
+          tf_end.M.DoRotX(R) 
+          tf_end.M.DoRotY(P) 
+          tf_end.M.DoRotZ(Y)
+          dic['frame_end'] = tf_end
 
-	if dic["tool"] == "gripper":
-		for dim in code.findall('finger_dim'):
-			dic["finger_length"] = float(dim.get('finger_length'))/1000
-			dic["finger_width"] = float(dim.get('finger_width'))/1000
-			dic["finger_height"] = float(dim.get('finger_height'))/1000
-		for key in code.findall('gripper_nail'):
-			for pos in key.findall('pos'): 
-				if pos.get('name') == 'x': 
-					x = float(pos.text)/1000
-				if pos.get('name') == 'y': 
-					y = float(pos.text)/1000
-				if pos.get('name') == 'z': 
-					z = float(pos.text)/1000
-			for rot in key.findall('rot'): 
-				if rot.get('name') == 'R': 
-					R = float(rot.text) 
-				if rot.get('name') == 'P': 
-					P = float(rot.text) 
-				if rot.get('name') == 'Y': 
-					Y = float(rot.text) 
-			tf_nail = PyKDL.Frame() 
-			tf_nail.p = PyKDL.Vector(x, y, z) 
-			tf_nail.M.DoRotX(R) 
-			tf_nail.M.DoRotY(P) 
-			tf_nail.M.DoRotZ(Y)
-		dic['frame_nail'] = tf_nail
+        if dic["tool"] == "gripper":
+          for dim in code.findall('finger_dim'):
+            dic["finger_length"] = float(dim.get('finger_length'))/1000
+            dic["finger_width"] = float(dim.get('finger_width'))/1000
+            dic["finger_height"] = float(dim.get('finger_height'))/1000
+          for key in code.findall('gripper_nail'):
+            for pos in key.findall('pos'): 
+              if pos.get('name') == 'x': 
+                x = float(pos.text)/1000
+              if pos.get('name') == 'y': 
+                y = float(pos.text)/1000
+              if pos.get('name') == 'z': 
+                z = float(pos.text)/1000
+            for rot in key.findall('rot'): 
+              if rot.get('name') == 'R': 
+                R = float(rot.text) 
+              if rot.get('name') == 'P': 
+                P = float(rot.text) 
+              if rot.get('name') == 'Y': 
+                Y = float(rot.text) 
+            tf_nail = PyKDL.Frame() 
+            tf_nail.p = PyKDL.Vector(x, y, z) 
+            tf_nail.M.DoRotX(R) 
+            tf_nail.M.DoRotY(P) 
+            tf_nail.M.DoRotZ(Y)
+            dic['frame_nail'] = tf_nail
 
-	main_dic[code.get("model")] = dic
+    main_dic[code.get("model")] = dic
 
     return main_dic
 

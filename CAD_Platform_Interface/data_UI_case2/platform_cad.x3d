@@ -175,7 +175,7 @@
 						</Shape>
 			</Transform>
 			<Transform DEF="ID0020"
-			           translation="-526.5 -42.5 13.000000"
+			           translation="-548.5 -32.5 13.000000"
 			           scale="1.000000 1.000000 1.000000"
 			           rotation="0.000000 0.000000 1.000000 -1.571"
 			           >
@@ -192,9 +192,9 @@
 						</Shape>
 			</Transform>
 			<Transform DEF="ID0030"
-			           translation="-212.5 -237.5 13.000000"
+			           translation="-205.5 -202.5 13.000000"
 			           scale="1.000000 1.000000 1.000000"
-			           rotation="0.000000 0.000000 1.000000 0.0"
+			           rotation="0.000000 0.000000 1.000000 3.1416"
 			           >
 						<Shape>
 							<Appearance>
@@ -209,9 +209,9 @@
 						</Shape>
 			</Transform>
 			<Transform DEF="ID0031"
-			           translation="-487.5 -412.5 13.000000"
+			           translation="-452.5 -419.5 13.000000"
 			           scale="1.000000 1.000000 1.000000"
-			           rotation="0.000000 0.000000 1.000000 -1.571"
+			           rotation="0.000000 0.000000 1.000000 1.571"
 			           >
 						<Shape>
 							<Appearance>

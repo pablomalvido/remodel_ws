@@ -276,7 +276,6 @@ def find_path_srv_callback(req):
     rrt_conn = RrtConnect(collisions, p_con, end_con, step, 0.05, 50000)
     #rrt_conn = RrtConnect(collisions, starting_point, end_point, 0.8, 0.05, 5000)
     path = rrt_conn.planning()
-    print(path)
 
     #transform path (points and poses) from the hanging connector to the EE
     length=0
@@ -287,21 +286,25 @@ def find_path_srv_callback(req):
     for p_tup in path:
         p = list(p_tup)
         path_EE.insert(0,EE_to_cable(p, rotZ, length_cable[req.WH])) #Add at the beginning. The generated path goes from last to first point
+    i=0
+    for p in path_EE:
         new_pose = Pose()
-        new_pose.position.x = path_EE[-1][0]
-        new_pose.position.y = path_EE[-1][1]
+        new_pose.position.x = p[0]/scale
+        new_pose.position.y = p[1]/scale
         if req.interpolate_z:
-            if len(path_EE)>1:
-                length_accum += dist_2d(path_EE[-2], path_EE[-1])
+            if i>1:
+                length_accum += dist_2d(path_EE[i-2], path_EE[i-1])
             new_pose.position.z = end_pose.position.z + (req.offset_z * (1-min((length_accum/length),1)))
         else:
             new_pose.position.z = end_pose.position.z + req.offset_z 
         new_pose.orientation = copy.copy(end_pose.orientation)
-        path_pose_EE.insert(0,new_pose)
+        path_pose_EE.append(new_pose)
+        i+=1
     #path_EE[-1] = end_point
     #path_EE.insert(0,starting_point)
     path_pose_EE[-1] = end_pose
-    rrt_conn.plotting.animation_connect(rrt_conn.V1, rrt_conn.V2, starting_point, end_point, path, path_EE, "RRT_CONNECT_"+str(req.WH)) #Save plot
+    if req.show:
+        rrt_conn.plotting.animation_connect(rrt_conn.V1, rrt_conn.V2, starting_point, end_point, path, path_EE, "RRT_CONNECT_WH"+str(req.WH)) #Save plot
 
     resp = pathFinderResponse()
     for pose in path_pose_EE:
@@ -309,7 +312,7 @@ def find_path_srv_callback(req):
     resp.success = True
     return resp
 
-rospy.Service('/find_free_path_rrt', pathFinder, find_path_srv_callback)
+rospy.Service('/adv_manip/find_free_path_rrt', pathFinder, find_path_srv_callback)
 
 
 scale = 100

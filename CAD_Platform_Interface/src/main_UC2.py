@@ -195,6 +195,8 @@ def create_jigs_struct():
                         tape_dic[tape]['center_pose'] = jig_frame_frombase * tape_dic[tape]['center_pose']
                     jig_temp_dict['tape_spots'] = tape_dic
                 
+                jig_temp_dict['center_pose'] = jig_frame_frombase * dict_elvez.dict_jigs[commercial]['center_jig']
+                jig_temp_dict['jig_dimensions'] = [dict_elvez.dict_jigs[commercial]['xcolli'], dict_elvez.dict_jigs[commercial]['ycolli'], 0]
                 jig_temp_dict['dimensions'] = dimensions
                 jig_temp_dict['collisions'] = collisions
                 jig_temp_dict['jig_frame'] = jig_frame_frombase
@@ -337,36 +339,37 @@ for trans in transforms:
     #print(trans.getCommercial())
     #print(dict_elvez.dict_jigs[trans.getCommercial()]['guides'])
         if(trans.getID().getType() == 1):
-            if 'guides' in dict_elvez.dict_jigs[trans.getCommercial()]:
-                for guide in dict_elvez.dict_jigs[trans.getCommercial()]['guides']:
-                    #print(guide)
-                    frame = PyKDL.Frame()
-                    #frame = dict_elvez.dict_jigs[trans.getCommercial()]['guides'][guide]['key']['frame']
-                    frame = dict_elvez.dict_jigs[trans.getCommercial()]['guides'][guide]['key']['center_pose']
-                    #print(frame)
-                    color = visualization.Color(1, 0, 0, 1)
-                    #scaleKP=np.array([0.001, 0.001, 0.001])
-                    scaleKP=np.array([1, 1, 1])
-                    keypoint = visualization.createKeypoint(frame_id=trans.getName(), transform=frame, scale=scaleKP, color=color)
-                    keypoint.id = len(markerArray.markers)
-                    keypoint.lifetime = rospy.Duration(0)
-                    keypoint.text = "Keypoint guide"
-                    markerArray.markers.append(keypoint)
-            if 'tape_spots' in dict_elvez.dict_jigs[trans.getCommercial()]:
-                for tape in dict_elvez.dict_jigs[trans.getCommercial()]['tape_spots']:
-                    #print(guide)
-                    frame = PyKDL.Frame()
-                    #frame = dict_elvez.dict_jigs[trans.getCommercial()]['tape_spots'][tape]['frame']
-                    frame = dict_elvez.dict_jigs[trans.getCommercial()]['tape_spots'][tape]['center_pose']
-                    #print(frame)
-                    color = visualization.Color(0, 0, 1, 1)
-                    #scaleKP=np.array([0.001, 0.001, 0.001])
-                    scaleKP=np.array([1, 1, 1])
-                    keypoint = visualization.createKeypoint(frame_id=trans.getName(), transform=frame, scale=scaleKP, color=color)
-                    keypoint.id = len(markerArray.markers)
-                    keypoint.lifetime = rospy.Duration(0)
-                    keypoint.text = "Keypoint tape"
-                    markerArray.markers.append(keypoint)
+            if trans.getCommercial() != "0020":
+                if 'guides' in dict_elvez.dict_jigs[trans.getCommercial()]:
+                    for guide in dict_elvez.dict_jigs[trans.getCommercial()]['guides']:
+                        #print(guide)
+                        frame = PyKDL.Frame()
+                        #frame = dict_elvez.dict_jigs[trans.getCommercial()]['guides'][guide]['key']['frame']
+                        frame = dict_elvez.dict_jigs[trans.getCommercial()]['guides'][guide]['key']['center_pose']
+                        #print(frame)
+                        color = visualization.Color(1, 0, 0, 1)
+                        #scaleKP=np.array([0.001, 0.001, 0.001])
+                        scaleKP=np.array([1, 1, 1])
+                        keypoint = visualization.createKeypoint(frame_id=trans.getName(), transform=frame, scale=scaleKP, color=color)
+                        keypoint.id = len(markerArray.markers)
+                        keypoint.lifetime = rospy.Duration(0)
+                        keypoint.text = "Keypoint guide"
+                        markerArray.markers.append(keypoint)
+                if 'tape_spots' in dict_elvez.dict_jigs[trans.getCommercial()]:
+                    for tape in dict_elvez.dict_jigs[trans.getCommercial()]['tape_spots']:
+                        #print(guide)
+                        frame = PyKDL.Frame()
+                        #frame = dict_elvez.dict_jigs[trans.getCommercial()]['tape_spots'][tape]['frame']
+                        frame = dict_elvez.dict_jigs[trans.getCommercial()]['tape_spots'][tape]['center_pose']
+                        #print(frame)
+                        color = visualization.Color(0, 0, 1, 1)
+                        #scaleKP=np.array([0.001, 0.001, 0.001])
+                        scaleKP=np.array([1, 1, 1])
+                        keypoint = visualization.createKeypoint(frame_id=trans.getName(), transform=frame, scale=scaleKP, color=color)
+                        keypoint.id = len(markerArray.markers)
+                        keypoint.lifetime = rospy.Duration(0)
+                        keypoint.text = "Keypoint tape"
+                        markerArray.markers.append(keypoint)
         elif(trans.getID().getType() == 2):
             if 'trays' in dict_elvez.dict_jigs[trans.getCommercial()]:
                 for tray in dict_elvez.dict_jigs[trans.getCommercial()]['trays']:
@@ -449,18 +452,19 @@ if cad_name_ATC != "":
     markerArray.markers.append(marker)
 
 #Keypoints in RVIZ
-    if(trans.getCommercial() in dict_elvez.dict_jigs):
-        if(trans.getID().getType() == 4):
-            frame = PyKDL.Frame()
-            frame = dict_elvez.dict_jigs[trans.getCommercial()]['frame_base']
-            color = visualization.Color(1, 0, 1, 1)
-            #scaleKP=np.array([0.001, 0.001, 0.001])
-            scaleKP=np.array([1, 1, 1])
-            keypoint = visualization.createKeypoint(frame_id=trans.getName(), transform=frame, scale=scaleKP, color=color)
-            keypoint.id = len(markerArray.markers)
-            keypoint.lifetime = rospy.Duration(0)
-            keypoint.text = "Keypoint tool base"
-            markerArray.markers.append(keypoint)
+    # if(trans.getCommercial() in dict_elvez.dict_jigs):
+    #     if(trans.getID().getType() == 4):
+    #         frame = PyKDL.Frame()
+    #         frame = dict_elvez.dict_jigs[trans.getCommercial()]['frame_base']
+    #         color = visualization.Color(1, 0, 1, 1)
+    #         #scaleKP=np.array([0.001, 0.001, 0.001])
+    #         scaleKP=np.array([1, 1, 1])
+    #         keypoint = visualization.createKeypoint(frame_id=trans.getName(), transform=frame, scale=scaleKP, color=color)
+    #         keypoint.id = len(markerArray.markers)
+    #         keypoint.lifetime = rospy.Duration(0)
+    #         keypoint.text = "Keypoint tool base"
+    #         markerArray.markers.append(keypoint)
+
     """
 #Check the transforms generated by the create_jigs_structure() function
 for jig in jigs_complete_dict:
@@ -655,8 +659,11 @@ def all_guides_info_callback(req):
                 data.key_length = jigs_complete_dict[jig]['guides'][guide]['key']['length']
                 data.key_gap = jigs_complete_dict[jig]['guides'][guide]['key']['gap']
                 data.key_height = jigs_complete_dict[jig]['guides'][guide]['key']['height']
-                data.key_center_frame = fromKdlToPose(jigs_complete_dict[jig]['guides'][guide]['key']['center_pose'])
                 data.dimensions = jigs_complete_dict[jig]['dimensions']
+                data.key_center_frame = fromKdlToPose(jigs_complete_dict[jig]['guides'][guide]['key']['center_pose'])
+                data.jig_corner_frame = fromKdlToPose(jigs_complete_dict[jig]['jig_frame'])
+                data.jig_center_frame = fromKdlToPose(jigs_complete_dict[jig]['center_pose'])
+                data.jig_dimensions = jigs_complete_dict[jig]['jig_dimensions']
                 resp.data.append(data)
                 resp.success = True
     return resp

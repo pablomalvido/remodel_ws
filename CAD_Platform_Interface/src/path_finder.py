@@ -21,7 +21,7 @@ import numpy as np
 
 
 #ROS init
-rospy.init_node('test_robot_pose', anonymous=True)
+rospy.init_node('path_finder_node', anonymous=True)
 
 
 #params
@@ -175,7 +175,7 @@ def get_path(p, end, length = 0, prev = 0):
 def plot_path(p, end, end_pose, angle, offset_cable, offset_z, interpolate_z):
     p_con = [cable_to_EE(p[0], angle, offset_cable)]
     end_con = cable_to_EE(end, angle, offset_cable)
-    p_con, length, success = get_path(p_con, end_con)
+    p_con, length, success = get_path(p_con, end_con) #Get the path for the connector. The pose of the gripper doesn't matter for now
     if not success:
         return [], False
     length += dist_2d(p_con[-1], end_con)

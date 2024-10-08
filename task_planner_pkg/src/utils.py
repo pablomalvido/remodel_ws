@@ -85,7 +85,6 @@ def compute_distance_xy(pose1, pose2):
     Retrieves the linear distance [mm] between two poses in xy.
     """
     dist = math.sqrt((pose1.position.x - pose2.position.x)**2 + (pose1.position.y - pose2.position.y)**2)
-    print(dist)
     return dist
 
 
