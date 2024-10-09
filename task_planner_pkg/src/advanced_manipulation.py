@@ -709,16 +709,36 @@ class ATC(object):
 
 
     def antiCorrectPose(self, cell_wrist_pose, arm_side, rotate = True, ATC_sign = -1, routing_app = False, route_arm = True):
-        cell_wrist_frame = pose_to_frame(cell_wrist_pose)
-        cell_wrist_pose_from_cell = self.correctPose(cell_wrist_pose, arm_side, rotate = rotate, ATC_sign = ATC_sign, routing_app = routing_app, route_arm = route_arm) #Trick, this frame doesn't mean anything
-        cell_wrist_frame_from_cell = pose_to_frame(cell_wrist_pose_from_cell)
-        guide_wrist_frame = get_inverse_frame(cell_wrist_frame) * cell_wrist_frame_from_cell
-        cell_guide_frame = cell_wrist_frame * get_inverse_frame(guide_wrist_frame)
-        cell_guide_pose = frame_to_pose(cell_guide_frame)
-        if rotate:
-                cell_guide_pose.position.z -= 2.4 #1.2*2
-
-        return cell_guide_pose
+        """
+        From R_base_wrist to R_torso_fingers. B=Base, T=Torso, W=Wrist, G=Gripper, F=Finger
+        """
+        R_BW = pose_to_frame(cell_wrist_pose)
+        listener_success = False 
+        while not listener_success:
+                try:
+                        (T_TB, R_TB) = listener.lookupTransform('/torso_base_link', '/base_link', rospy.Time(0))
+                        R_TB = listener_to_frame(T_TB, R_TB)
+                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                        rospy.sleep(0.1)
+                        print("Listener error")
+                        continue
+                listener_success = True
+        if arm_side == 'right':
+                tool = self.EEF_right
+                ATC_angle = self.right_ATC_angle
+                ATC_dist = self.right_ATC_dist
+        else:
+                tool = self.EEF_left   
+                ATC_angle = self.left_ATC_angle
+                ATC_dist = self.left_ATC_dist
+        R_WG_p = PyKDL.Vector(0,0,ATC_dist)
+        R_WG = PyKDL.Frame(R_WG_p)     
+        R_WG.M.DoRotZ(ATC_angle)
+        R_GF = self.EEF_dict[tool].EE_end_frame
+        R_TF = R_TB * R_BW * R_WG * R_GF
+        R_TF.M.DoRotX(math.pi) #R_TF inverted
+        torso_fingers_pose = frame_to_pose(R_TF)
+        return torso_fingers_pose
 
 
 def def_EEF(req):
@@ -776,6 +796,13 @@ def correctPoseSrv(req):
 
 rospy.Service("/adv_manip/correct_pose", GetCorrectPose, correctPoseSrv)
 
+def antiCorrectPoseSrv(req):
+    global ATC1
+    resp = GetCorrectPoseResponse()
+    resp.pose = ATC1.antiCorrectPose(req.target_pose, req.arm_side, req.rotate, req.ATC_sign, req.routing_app, req.route_arm)        
+    return resp
+
+rospy.Service("/adv_manip/anti_correct_pose", GetCorrectPose, antiCorrectPoseSrv)
 
 ###################################################
 status_movement = 0
@@ -786,6 +813,12 @@ force_controlled = False
 stop_mov_force = False
 
 #SUBSCRIBERS
+def callback_stop(msg):
+    global stop_mov
+    stop_mov = True
+
+robot_status_subscriber = rospy.Subscriber('/task_planner/operation_stop', Bool, callback_stop) 
+
 def callback_robot_status(msg):
     global stop_mov
     if str(msg.e_stopped) == "val: 1":
@@ -872,19 +905,25 @@ def move_group_async(group):
     step_increase = 0
     msg_log = String()
     msg_log.data = str(group) + " moving..."
-    #logs_publisher.publish(msg_log)
+    logs_publisher.publish(msg_log)
     motion_groups[group].go(wait=False) 
-    while status_movement==3 and not stop_mov:
+    wait_step_i = 0
+    while (status_movement2==3 or status_movement2==4 or status_movement2==2) and not stop_mov:
             rospy.sleep(0.01)
+            wait_step_i+=1
+            if wait_step_i>100:
+                    break
+    print(str(group) + " STATUS MOTION " + str(status_movement2))
     while (status_movement==0 or status_movement==1 or status_movement==2) and not stop_mov:
             rospy.sleep(0.05)
+    print(str(group) + " STATUS MOTION " + str(status_movement2))
     if not stop_mov:
             step_increase = 1
     if status_movement==3:
             msg_log.data = "Successful movement"
     else:
             msg_log.data = "Failure movement" 
-    #logs_publisher.publish(msg_log)
+    logs_publisher.publish(msg_log)
     #process_actionserver.publish_feedback()
     return step_increase
         
@@ -896,7 +935,7 @@ def execute_plan_async(group, plan):
     step_increase = 0
     msg_log = String()
     msg_log.data = str(group) + " moving..."
-    #logs_publisher.publish(msg_log)
+    logs_publisher.publish(msg_log)
     motion_groups[group].execute(plan, wait=False)
     wait_step_i = 0
     while (status_movement2==3 or status_movement2==4 or status_movement2==2) and not stop_mov:
@@ -915,7 +954,7 @@ def execute_plan_async(group, plan):
             msg_log.data = "Successful movement"
     else:
             msg_log.data = "Failure movement"
-    #logs_publisher.publish(msg_log) 
+    logs_publisher.publish(msg_log) 
     #process_actionserver.publish_feedback()
     return step_increase
 
@@ -2326,6 +2365,7 @@ def async_move_goal_callback(goal):
         fb = ExecutePlanFeedback()
         res = ExecutePlanResult()
         fb.step_inc = move_group_async(motion_groups_map[goal.group])
+        print("MOVEMENT DONE")
         fb.done = True
         move_async_action.publish_feedback(fb)
         res.success = True
@@ -2339,6 +2379,7 @@ def async_plan_goal_callback(goal):
         fb = ExecutePlanFeedback()
         res = ExecutePlanResult()
         fb.step_inc = execute_plan_async(motion_groups_map[goal.group], goal.plan)
+        print("MOVEMENT DONE")
         fb.done = True
         exe_plan_async_action.publish_feedback(fb)
         res.success = True
