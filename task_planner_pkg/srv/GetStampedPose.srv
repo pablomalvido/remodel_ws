@@ -1,0 +1,5 @@
+string group
+geometry_msgs/Pose pose
+
+---------------
+geometry_msgs/PoseStamped poseSt

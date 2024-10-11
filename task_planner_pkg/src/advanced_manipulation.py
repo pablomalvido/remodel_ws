@@ -737,6 +737,8 @@ class ATC(object):
         R_GF = self.EEF_dict[tool].EE_end_frame
         R_TF = R_TB * R_BW * R_WG * R_GF
         R_TF.M.DoRotX(math.pi) #R_TF inverted
+        if routing_app:
+               R_TF.M.DoRotZ(math.pi) #This wouldn't be needed, but it is necessary to match it with the current definition of correctPose()
         torso_fingers_pose = frame_to_pose(R_TF)
         return torso_fingers_pose
 
@@ -786,6 +788,17 @@ def get_current_pose_srv(req):
     return resp
 
 rospy.Service("/adv_manip/get_current_pose", GetGroupPose, get_current_pose_srv)
+
+def get_stampedpose_srv(req):
+        pose_result = PoseStamped()
+        pose_result.pose = req.pose
+        header = motion_groups[motion_groups_map[req.group]].get_current_pose().header
+        pose_result.header = header
+        resp = GetStampedPoseResponse()
+        resp.poseSt = pose_result
+        return resp
+
+rospy.Service("/adv_manip/get_stampedpose", GetStampedPose, get_stampedpose_srv)
 
 def correctPoseSrv(req):
     global ATC1
@@ -2343,6 +2356,30 @@ def compute_cartesian_path_velocity_control_arms_occlusions_srv(req):
         return resp
 
 rospy.Service("/adv_manip/compute_cartesian_path_velocity_control_arms_occlusions", ComputePath, compute_cartesian_path_velocity_control_arms_occlusions_srv)
+
+
+def dual_arm_cartesian_plan_srv(req):
+        waypoints_L = []
+        for list_i in req.waypoints_list_L:
+               waypoints_L.append(list_i.data)
+        waypoints_R = []
+        for list_i in req.waypoints_list_R:
+               waypoints_R.append(list_i.data)
+        resp = ComputePathResponse()     
+        plan, success = dual_arm_cartesian_plan(waypoints_L, req.EE_speed_L, waypoints_R, req.EE_speed_R, ATC1, req.sync_policy)
+        resp.plan = plan; resp.success = success
+        return resp
+
+rospy.Service("/adv_manip/dual_arm_cartesian_plan", ComputePathDual, dual_arm_cartesian_plan_srv)
+
+
+def master_slave_plan_srv(req):
+        resp = ComputeMasterSlavePathResponse()
+        plan, success = master_slave_plan(req.waypoints_list, ATC1, req.EE_speed, req.arm_side, req.sync_policy)
+        resp.plan = plan; resp.success = success
+        return resp
+
+rospy.Service("/adv_manip/master_slave_plan", ComputeMasterSlavePath, master_slave_plan_srv)
 
 """
 def move_group_async_srv(req):

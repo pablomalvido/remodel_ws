@@ -1,0 +1,8 @@
+geometry_msgs/Pose[] waypoints_list
+float64 EE_speed
+string arm_side
+int16 sync_policy
+
+---------------
+moveit_msgs/RobotTrajectory plan
+bool success

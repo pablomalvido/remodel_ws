@@ -1,0 +1,9 @@
+float_list[] waypoints_list_L
+float_list[] waypoints_list_R
+float64[] EE_speed_L
+float64[] EE_speed_R
+int16 sync_policy
+
+---------------
+moveit_msgs/RobotTrajectory plan
+bool success

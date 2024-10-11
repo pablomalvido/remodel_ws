@@ -64,9 +64,12 @@ add_service_files(
    DefMotionGroups.srv
    GetCorrectPose.srv
    GetGroupPose.srv
+   GetStampedPose.srv
    MaxSpeedGroups.srv
    MotionGroupsCommand.srv
    ComputePath.srv
+   ComputePathDual.srv
+   ComputeMasterSlavePath.srv
    ExecuteMovement.srv
    Confirmation.srv
    FingersDim.srv
