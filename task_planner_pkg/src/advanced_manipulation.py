@@ -754,7 +754,7 @@ rospy.Service("/adv_manip/def_EEF", DefEEF, def_EEF)
 def def_ATC(req):
     global ATC1
     global max_arms_dist
-    max_arms_dist = frame_to_pose(EEF_list[req.left_tool].EE_end_frame).position.x + frame_to_pose(EEF_list[req.right_tool].EE_end_frame).position.x + EEF_list[req.left_tool].fingers_dim[0]/2 + EEF_list[req.right_tool].fingers_dim[0]/2 + 0.05
+    max_arms_dist = frame_to_pose(EEF_list[req.left_tool].EE_end_frame).position.x + frame_to_pose(EEF_list[req.right_tool].EE_end_frame).position.x + EEF_list[req.right_tool].fingers_dim[0]/2 + EEF_list[req.right_tool].fingers_dim[0]/2 + 0.05
     ATC_tools_list = []
     for tool in req.ATC_tools:
            ATC_tools_list.append(EEF_list[tool])

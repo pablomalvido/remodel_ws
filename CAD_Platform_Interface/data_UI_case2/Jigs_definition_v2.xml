@@ -200,24 +200,24 @@
             </collision>
         </guide>
     </comb>
-    <ATC_station model="0000301" xdim="10" ydim="34" zdim="65" tool="gun">
+    <ATC_station model="0000301" xdim="350" ydim="300" zdim="100" tool="gun">
     	<tool_base>
-		<pos name="x">66.75</pos>
-                <pos name="y">34.5</pos>
+		        <pos name="x">-48.25</pos>
+                <pos name="y">109.5</pos>
                 <pos name="z">145.0</pos>
-                <rot name="R">-1.57</rot>
-                <rot name="P">0</rot>
-                <rot name="Y">-1.57</rot>
-	</tool_base>
-	<tool_end>
-                <pos name="x">100.0</pos>
-                <pos name="y">-55.0</pos>
-                <pos name="z">86.0</pos>
                 <rot name="R">0</rot>
                 <rot name="P">1.57</rot>
-                <rot name="Y">0</rot>
-	</tool_end>
-	<tool_dim x="220.0" y="300.0" z="100.0"></tool_dim> <!-- tool_dim x is the max tool distance from the wrist in x. The real total x dimension in 350 -->
+                <rot name="Y">3.14</rot>
+        </tool_base>
+        <tool_end>
+                <pos name="x">-10.0</pos>
+                <pos name="y">-71.0</pos>
+                <pos name="z">234.63</pos>
+                <rot name="R">0</rot>
+                <rot name="P">0</rot>
+                <rot name="Y">3.141592</rot>
+        </tool_end>
+        <tool_dim x="220.0" y="300.0" z="100.0"></tool_dim> <!-- tool_dim x is the max tool distance from the wrist in x. The real total x dimension in 350 -->
     </ATC_station>
     <ATC_station model="0000302" xdim="10" ydim="34" zdim="65" tool="gripper">
     	<tool_base>
@@ -229,19 +229,19 @@
                 <rot name="Y">-1.57</rot>
 	</tool_base>
 	<tool_end>
-                <pos name="x">0</pos>
+                <pos name="x">94.0</pos>
                 <pos name="y">0</pos>
-                <pos name="z">240.0</pos> <!--200.0 in the STL that means 6cm from finger base till the middle of the circle-->
+                <pos name="z">197.7</pos> <!--200.0 in the STL that means 6cm from finger base till the middle of the circle-->
                 <rot name="R">0</rot>
                 <rot name="P">0</rot>
                 <rot name="Y">0</rot>
 	</tool_end>
-	<tool_dim x="73.0" y="25.0" z="265.0"></tool_dim>
-	<finger_dim finger_length = "40.0" finger_width = "20.0" finger_height = "125.0"></finger_dim> <!--finger_dim finger_length = "40.0(?)" finger_width = "40.0" finger_height = "85.0"></finger_dim-->
-	<gripper_nail>
-                <pos name="x">0</pos>
+	<tool_dim x="73.0" y="25.0" z="240.0"></tool_dim>
+	<finger_dim finger_thickness = "13.0" finger_width = "34.0" finger_height = "15.3"></finger_dim> <!--finger_height = z distance from the fingers center to the tip-->
+    <gripper_nail>
+                <pos name="x">94.0</pos>
                 <pos name="y">0</pos>
-                <pos name="z">260.0</pos> <!--220.0 in the STL-->
+                <pos name="z">210.0</pos> <!--220.0 in the STL-->
                 <rot name="R">0</rot>
                 <rot name="P">0</rot>
                 <rot name="Y">0</rot>

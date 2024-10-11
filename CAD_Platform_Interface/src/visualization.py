@@ -57,5 +57,5 @@ def createKeypoint(frame_id, transform=PyKDL.Frame(), color=Color(1, 0, 0, 1), s
     marker.pose.orientation.y = quat[1] 
     marker.pose.orientation.z = quat[2] 
     marker.pose.orientation.w = quat[3] 
-    print("Working properly...")
+    #print("Working properly...")
     return marker

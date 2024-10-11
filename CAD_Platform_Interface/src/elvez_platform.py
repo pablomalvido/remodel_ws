@@ -161,7 +161,7 @@ class Scene(Transform):
             content = rfile.readlines()
             for line in content:
                 chunks = line.split('\t')
-                print(chunks)
+                #print(chunks)
                 for line in content:
                     id_map[chunks[0].strip()] = ItemID(chunks[0].strip(), chunks[1].strip(), chunks[2].strip())
         for child in root:

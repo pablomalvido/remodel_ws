@@ -288,6 +288,7 @@ class InputFilesDataCollector(object):
         main_dic[code.get("model")] = dic
 
       if code.tag=="ATC_station":
+        print(code.get("model"))
         dic = {} 
         couples = {}
         dic["type"] = "ATC_station"
@@ -346,7 +347,7 @@ class InputFilesDataCollector(object):
 
         if dic["tool"] == "gripper":
           for dim in code.findall('finger_dim'):
-            dic["finger_length"] = float(dim.get('finger_length'))/1000
+            dic["finger_thickness"] = float(dim.get('finger_thickness'))/1000
             dic["finger_width"] = float(dim.get('finger_width'))/1000
             dic["finger_height"] = float(dim.get('finger_height'))/1000
           for key in code.findall('gripper_nail'):
@@ -370,8 +371,10 @@ class InputFilesDataCollector(object):
             tf_nail.M.DoRotY(P) 
             tf_nail.M.DoRotZ(Y)
             dic['frame_nail'] = tf_nail
+        else:
+          print(dic["tool"])
 
-    main_dic[code.get("model")] = dic
+        main_dic[code.get("model")] = dic
 
     return main_dic
 

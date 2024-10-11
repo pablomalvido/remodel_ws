@@ -74,6 +74,7 @@ add_service_files(
   all_cad_components.srv
   tool_info.srv
   guide_all_info.srv
+  get_list.srv
   #pathFinder.srv
   #Pose_srv.srv
 )
