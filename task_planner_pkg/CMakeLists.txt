@@ -74,6 +74,7 @@ add_service_files(
    Confirmation.srv
    FingersDim.srv
    EEFInit.srv
+   StringSrv.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -83,6 +84,7 @@ add_action_files(
   gripper_Act.action
   EEFAct.action
   ExecutePlan.action
+  ATC.action
 )
 
 ## Generate added messages and services with any dependencies listed here

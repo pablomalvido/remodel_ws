@@ -1,0 +1,9 @@
+#Goal
+string side
+string tool
+---------------
+#Result
+bool success
+---------------
+#Feedback
+bool done

@@ -25,6 +25,7 @@ from ROS_UI_backend.srv import *
 from task_planner_pkg.msg import gripper_ActFeedback, gripper_ActResult, gripper_ActAction, gripper_ActGoal
 from task_planner_pkg.msg import process_UIFeedback, process_UIResult, process_UIAction, process_UIGoal
 from task_planner_pkg.msg import ExecutePlanAction, ExecutePlanFeedback, ExecutePlanGoal, ExecutePlanResult
+from task_planner_pkg.msg import ATCAction, ATCFeedback, ATCGoal, ATCResult
 import actionlib
 from actionlib_msgs.msg import GoalStatusArray
 from vision_pkg_full_demo.srv import *
@@ -310,6 +311,7 @@ class ATC(object):
         - arm_side: Arm side in which to change the tool ["left" or "right"]
         IMPORTANT: Modify all the named target poses to match the poses defined in your SRDF file. The name of the move_groups is asumed to be: arm_left, arm_right, arms and torso.
         """
+        print("CHNGING")
         z_offset = 0.05 #In meters
         vert_offset = 0.07 #In meters
 
@@ -334,7 +336,7 @@ class ATC(object):
         rospy.sleep(0.5)
 
         if arm_side == "right":
-                motion_groups['arm_left'].set_named_target("arm_left_down")
+                motion_groups['arm_left'].set_named_target("arm_left_platform_5")
                 motion_groups['arm_left'].go(wait=True)
                 rospy.sleep(0.5)
                 motion_groups['arm_right'].set_named_target("arm_right_ATC")
@@ -350,8 +352,11 @@ class ATC(object):
                 ATC_ang = self.right_ATC_angle
                 self.EEF_right = "None"
         else:
-                motion_groups['arms'].set_named_target("arms_ATC_left")
-                motion_groups['arms'].go(wait=True)
+                motion_groups['arm_right'].set_named_target("arm_right_platform_5")
+                motion_groups['arm_right'].go(wait=True)
+                rospy.sleep(0.5)
+                motion_groups['arm_left'].set_named_target("arm_left_ATC")
+                motion_groups['arm_left'].go(wait=True)
                 rospy.sleep(0.5)
                 motion_groups['torso'].set_named_target("torso_ATC")
                 motion_groups['torso'].go(wait=True)
@@ -2381,22 +2386,6 @@ def master_slave_plan_srv(req):
 
 rospy.Service("/adv_manip/master_slave_plan", ComputeMasterSlavePath, master_slave_plan_srv)
 
-"""
-def move_group_async_srv(req):
-        resp = ExecuteMovementResponse()
-        resp.step_inc = move_group_async(motion_groups_map[req.group])
-        return resp
-
-rospy.Service("/adv_manip/move_group_async", ExecuteMovement, move_group_async_srv)
-
-def execute_plan_async_srv(req):
-        resp = ExecuteMovementResponse()
-        resp.step_inc = execute_plan_async(motion_groups_map[req.group], req.plan)
-        return resp
-
-rospy.Service("/adv_manip/execute_plan_async", ExecuteMovement, execute_plan_async_srv)
-"""
-
 def async_move_goal_callback(goal):
         global move_async_action
         fb = ExecutePlanFeedback()
@@ -2450,6 +2439,35 @@ def execute_force_goal_callback(goal):
 
 exe_plan_force_action = actionlib.SimpleActionServer("adv_manip/execute_force_control", ExecutePlanAction, execute_force_goal_callback, False)
 exe_plan_force_action.start()
+
+def change_tool_callback(goal):
+        global ATC1
+        print("RECEIVED")
+        try:
+                new_tool, success = ATC1.changeTool(goal.tool, goal.side)
+        except:
+               print("ATC ERROR")
+               success = False
+        res = ATCResult()
+        res.success = success
+        if success:
+                atc_action.set_succeeded(res)
+        else:
+                atc_action.set_aborted()
+
+atc_action = actionlib.SimpleActionServer("adv_manip/ATC", ATCAction, change_tool_callback, False)
+atc_action.start()
+
+def get_tool(req):
+        global ATC1
+        resp = StringSrvResponse()
+        if req.data == 'right':
+                resp.data = ATC1.EEF_right
+        else:
+                resp.data = ATC1.EEF_left 
+        return resp
+
+rospy.Service("/adv_manip/get_tool", StringSrv, get_tool)
 
 def get_fingers_size(req):
         global ATC1

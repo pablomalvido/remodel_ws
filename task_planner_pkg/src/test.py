@@ -18,6 +18,7 @@ from task_planner_pkg.srv import *
 import actionlib
 from task_planner_pkg.msg import EEFActAction, EEFActResult, EEFActFeedback, EEFActGoal
 from task_planner_pkg.msg import ExecutePlanAction, ExecutePlanGoal, ExecutePlanFeedback
+from task_planner_pkg.msg import ATCAction, ATCGoal
 from path_planning_pkg.srv import *
 from vision_pkg_full_demo.srv import *
 
@@ -174,7 +175,8 @@ for group in motion_groups:
     req.group = group
     def_max_speed_srv(req)
 
-init_tools = {'left':'EEF_gripper_left','right':'EEF_gripper_right'}
+#init_tools = {'left':'EEF_gripper_left','right':'EEF_gripper_right'}
+init_tools = {'left':'EEF_taping_gun','right':'EEF_gripper_right'}
 ATC_tools = []
 ATC_extra_z=0.065
 torso_height = 1.2
@@ -2078,6 +2080,31 @@ def get_fingers_size(side):
         req.side = side
         return fingers_srv(req.side).data
 
+def get_tool(side):
+        rospy.wait_for_service('/adv_manip/get_tool')
+        tool_srv = rospy.ServiceProxy('/adv_manip/get_tool', StringSrv)
+        req = StringSrvRequest()
+        req.data = side
+        return tool_srv(req.data).data
+
+def change_tool(new_tool, side):
+        print("CHANGE TOOL")
+        client=actionlib.SimpleActionClient('/adv_manip/ATC', ATCAction) #Stablishes the connection with the server
+        client.wait_for_server()
+        goal = ATCGoal()
+        goal.tool = new_tool; goal.side = side
+        client.send_goal(goal)
+        success = False
+        atc_done = False
+        while not atc_done:
+                rospy.sleep(0.05)
+                state = client.get_state()
+                if state==2 or state == 3 or state == 4:
+                        atc_done = True
+                if state == 3:
+                        success = True
+        return success
+
 eef_done=False
 def eef_feedback_callback(fb):
         global eef_done
@@ -2236,6 +2263,44 @@ def update_route_arm_info(op):
         separated_global = False
 
 
+def check_tools(op, config, step2):
+        success = True
+        if op['type'] != 'T':
+                if get_tool("right") == "EEF_taping_gun":
+                        #MOVE TO A CONFIGURATION WITH THE GUN HORIZONTAL IN SEVERAL STEPS TO AVOID COLLISION (MOVE CONFIG)
+                        success = change_tool("EEF_gripper_right", "right")
+                        step2 = 0
+                elif get_tool("left") =="EEF_taping_gun":
+                        #MOVE TO A CONFIGURATION WITH THE GUN HORIZONTAL IN SEVERAL STEPS TO AVOID COLLISION (MOVE CONFIG)
+                        success = change_tool("EEF_gripper_left", "left")
+                        step2 = 0
+        else:
+                print("TAPE")
+                if (op["spot"][0]["pose_corner"].position.x <= op["spot"][2]["pose_corner"].position.x) and (op["spot"][1]["pose_corner"].position.x <= op["spot"][2]["pose_corner"].position.x):   #Tape with left
+                        #LEFT ARM TAPES
+                        if get_tool("right")=="EEF_taping_gun":
+                                print("HAVE TO CHANGE RIGHT TOOL")
+                                success = change_tool("EEF_gripper_right", "right")
+                                step2 = 0
+                        if get_tool("left")=="EEF_gripper_left":
+                                print("HAVE TO CHANGE LEFT TOOL")
+                                actuate_grippers(config['grasp_distance'], config['gripper_speed'], "left", grasp=False)
+                                success = change_tool("EEF_taping_gun", "left")
+                                step2 = 0
+                else: #Tape with right
+                        if get_tool("left")=="EEF_taping_gun":
+                                success = change_tool("EEF_gripper_left", "left")
+                                step2 = 0
+                        if get_tool("right")=="EEF_gripper_right":
+                                success = change_tool("EEF_taping_gun", "right")
+                                step2 = 0
+                                #MOVE TO A CONFIGURATION WITH THE GUN VERTICAL IN SEVERAL STEPS TO AVOID COLLISION (MOVE CONFIG)
+        if not success:
+                stop_function("ATC ERROR")
+        print(step2)
+        print(success)
+        return step2, success
+
 def execute_operation(op):
         global PC_op
         global route_arm
@@ -2245,6 +2310,10 @@ def execute_operation(op):
         global step1
         global step2 
         global config2
+
+        step2, success = check_tools(op, config2, step2)
+        print(step2)
+        print(success)
 
         if op['type'] == "EC":
                 PC_op = get_next_connector_info(op)
