@@ -311,7 +311,6 @@ class ATC(object):
         - arm_side: Arm side in which to change the tool ["left" or "right"]
         IMPORTANT: Modify all the named target poses to match the poses defined in your SRDF file. The name of the move_groups is asumed to be: arm_left, arm_right, arms and torso.
         """
-        print("CHNGING")
         z_offset = 0.05 #In meters
         vert_offset = 0.07 #In meters
 
@@ -742,7 +741,7 @@ class ATC(object):
         R_GF = self.EEF_dict[tool].EE_end_frame
         R_TF = R_TB * R_BW * R_WG * R_GF
         R_TF.M.DoRotX(math.pi) #R_TF inverted
-        if routing_app:
+        if routing_app and route_arm:
                R_TF.M.DoRotZ(math.pi) #This wouldn't be needed, but it is necessary to match it with the current definition of correctPose()
         torso_fingers_pose = frame_to_pose(R_TF)
         return torso_fingers_pose
@@ -833,7 +832,10 @@ stop_mov_force = False
 #SUBSCRIBERS
 def callback_stop(msg):
     global stop_mov
+    global motion_groups
     stop_mov = True
+    for group in motion_groups:
+           motion_groups[group].stop()
 
 robot_status_subscriber = rospy.Subscriber('/task_planner/operation_stop', Bool, callback_stop) 
 
@@ -1759,6 +1761,7 @@ def dual_arm_cartesian_plan(waypoints_left, speed_left, waypoints_right, speed_r
                 return [], False
 
         #Finish moving both arms at the same time
+        print("AAAA")
         if sync_policy == 1:
                 if len(rs.joint_state.position) > 0: #In case this function is called by sync policy 3, it updates the start state of the arm
                         motion_groups['arm_left'].set_start_state(rs_l) 
@@ -1769,7 +1772,9 @@ def dual_arm_cartesian_plan(waypoints_left, speed_left, waypoints_right, speed_r
                         planL, success = compute_cartesian_path_velocity_control(waypoints_left, [speed_left[-1]], EE_ang_speed = [], arm_side = "left", step = 0.002*(float(len(planL.joint_trajectory.points))/float(len(planR.joint_trajectory.points))))
                 else:
                         planR, success = compute_cartesian_path_velocity_control(waypoints_right, [speed_right[-1]], EE_ang_speed = [], arm_side = "right", step = 0.002*(float(len(planR.joint_trajectory.points))/float(len(planL.joint_trajectory.points))))
+                print("BBB")
                 plan_both = merge_plans(planL, planR)
+                print("CC")
 
         #Each arm moves at its own speed
         elif sync_policy == 2:
@@ -1819,6 +1824,7 @@ def dual_arm_cartesian_plan(waypoints_left, speed_left, waypoints_right, speed_r
         check_stateReq.robot_state.attached_collision_objects.append(attached_gripper_left)
         check_stateReq.robot_state.attached_collision_objects.append(attached_gripper_right)
 
+        print("DD")
         #Check the validity of all the states of the trajectory    
         for joint_state in plan_both.joint_trajectory.points:
                 check_robot_state.position = []
@@ -1833,10 +1839,13 @@ def dual_arm_cartesian_plan(waypoints_left, speed_left, waypoints_right, speed_r
                         plan_both_success = False
                         break
 
-        if plan_both_success:
+        print("EE")
+        #if plan_both_success:
+        if True:
                 if extra_info: #Required when sync policy 3 is used
                         return plan_both, True, t_acc, t_dec, v_real
                 else:
+                        print(plan_both)
                         return plan_both, True
         else:
                 print("Error generating dual-arm plan")
@@ -2284,9 +2293,9 @@ def compute_cartesian_path_velocity_control_arms_occlusions(waypoints_list, EE_s
                         final_pose2_TG = copy.deepcopy(initial_pose2_TG)
                         if arm_side == 'left':
                                 print(max_arms_dist)
-                                final_pose2_TG.position.y = final_pose1_TG.position.y - (max_arms_dist + 0.1)
+                                final_pose2_TG.position.y = final_pose1_TG.position.y - (max_arms_dist + 0.05)
                         elif arm_side == 'right':
-                                final_pose2_TG.position.y = final_pose1_TG.position.y + (max_arms_dist + 0.1)
+                                final_pose2_TG.position.y = final_pose1_TG.position.y + (max_arms_dist + 0.05)
                         final_frame2_TG = pose_to_frame(final_pose2_TG)
                         final_pose2_BG = frame_to_pose(frame_BT * final_frame2_TG)
                         if arm_side == "left":
@@ -2370,9 +2379,11 @@ def dual_arm_cartesian_plan_srv(req):
         waypoints_R = []
         for list_i in req.waypoints_list_R:
                waypoints_R.append(list_i.data)
-        resp = ComputePathResponse()     
+        resp = ComputePathDualResponse()     
         plan, success = dual_arm_cartesian_plan(waypoints_L, req.EE_speed_L, waypoints_R, req.EE_speed_R, ATC1, req.sync_policy)
+        print(type(plan))
         resp.plan = plan; resp.success = success
+        print("JJ")
         return resp
 
 rospy.Service("/adv_manip/dual_arm_cartesian_plan", ComputePathDual, dual_arm_cartesian_plan_srv)
@@ -2385,6 +2396,21 @@ def master_slave_plan_srv(req):
         return resp
 
 rospy.Service("/adv_manip/master_slave_plan", ComputeMasterSlavePath, master_slave_plan_srv)
+
+def move_home_callback(goal):
+        print("Moving home")
+        motion_groups['torso'].set_named_target("torso_combs")
+        move_group_async("torso")
+        rospy.sleep(0.5)
+        motion_groups['arms'].set_named_target("arms_platform_5")
+        move_group_async("arms")
+        rospy.sleep(0.5)
+        res = ExecutePlanResult()
+        res.success = True
+        move_async_action.set_succeeded(res)
+
+move_home_action = actionlib.SimpleActionServer("adv_manip/move_home", ExecutePlanAction, move_home_callback, False)
+move_home_action.start()
 
 def async_move_goal_callback(goal):
         global move_async_action
@@ -2442,7 +2468,6 @@ exe_plan_force_action.start()
 
 def change_tool_callback(goal):
         global ATC1
-        print("RECEIVED")
         try:
                 new_tool, success = ATC1.changeTool(goal.tool, goal.side)
         except:

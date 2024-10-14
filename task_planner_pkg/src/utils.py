@@ -296,7 +296,7 @@ def interpolate_trajectory(initial_pose, final_pose, step_pos_min, step_deg_min,
         return True, waypoints
 
 
-def circular_trajectory(center, initial_pose, degree, rot_axis, center_waypoints, circle_waypoints, step = 2, rot_gripper = False): #R axis is x and Rot axis is z in its own rotation frame
+def circular_trajectory_old(center, initial_pose, degree, rot_axis, center_waypoints, circle_waypoints, step = 2, rot_gripper = False): #R axis is x and Rot axis is z in its own rotation frame
         R_axis = get_axis(initial_pose, center)
         threshold_ort = 0.05 #0.001
         if abs(cross_product_vectors(R_axis, rot_axis)) > threshold_ort:
@@ -354,6 +354,94 @@ def circular_trajectory(center, initial_pose, degree, rot_axis, center_waypoints
                 #Transform this circular curve that is in its own frame to the real rotation frame
                 circle_waypoint_pose_new = frame_to_pose(RM_world_own * new_waypoint_circle_own) #pose
                 center_waypoints_pose_new = frame_to_pose(RM_world_own * new_waypoint_center_own) #pose
+                if not rot_gripper:
+                       circle_waypoint_pose_new.orientation = initial_pose.orientation
+
+                circle_waypoints.append(circle_waypoint_pose_new) #pose
+                center_waypoints.append(center_waypoints_pose_new) #pose
+
+        return True, center_waypoints, circle_waypoints
+
+
+def circular_trajectory(center, initial_pose, degree, rot_axis, center_waypoints, circle_waypoints, step = 2, rot_gripper = False, invert_y_axis = True): #R axis is x and Rot axis is z in its own rotation frame
+        if degree < 0:
+                degree = -degree
+                rot_axis = [-rot_axis[0], -rot_axis[1], -rot_axis[2]]
+        R_axis = get_axis(initial_pose, center)
+        threshold_ort = 0.05 #0.001
+        if abs(cross_product_vectors(R_axis, rot_axis)) > threshold_ort:
+                print("Error. axis are not orthogonal")
+                return False, center_waypoints, circle_waypoints
+        if invert_y_axis:
+                R_axis, rot_axis, y_axis = get_ort_axis(R_axis, rot_axis) #X, Z (this is actually wrong)
+        else:
+                rot_axis, R_axis, y_axis = get_ort_axis(rot_axis, R_axis) #Z, X
+        RM_world_own = PyKDL.Frame() 
+        RM_world_own.p = PyKDL.Vector(center.position.x, center.position.y, center.position.z)
+        RM_world_own.M = PyKDL.Rotation(R_axis[0], y_axis[0], rot_axis[0], R_axis[1], y_axis[1], rot_axis[1], R_axis[2], y_axis[2], rot_axis[2])
+        print(RM_world_own)
+        #RM_own_world = get_inverse_frame(RM_world_own)
+
+        #Get initial gripper orientation from own circle frame
+        Rot_own_world = get_transpose_rot(RM_world_own.M)
+        Rot_world_gripper_cicle = PyKDL.Rotation.Quaternion(initial_pose.orientation.x, initial_pose.orientation.y, initial_pose.orientation.z, initial_pose.orientation.w) 
+        initial_gripper_circle_ori_own = Rot_own_world * Rot_world_gripper_cicle
+        Rot_world_gripper_center = PyKDL.Rotation.Quaternion(center.orientation.x, center.orientation.y, center.orientation.z, center.orientation.w)
+        initial_gripper_center_ori_own = Rot_own_world * Rot_world_gripper_center
+
+        R = compute_distance(center, initial_pose)
+        
+        #Initialize variables
+        #circle_waypoints_own = []
+        #center_waypoints_own = []
+
+        if invert_y_axis:
+                init_point_circle_own = PyKDL.Frame()
+                init_point_circle_own.p = PyKDL.Vector(R,0,0)
+                init_point_circle_own.M = initial_gripper_circle_ori_own
+                #circle_waypoints_own.append(new_waypoint_circle_own)
+                init_point_center_own = PyKDL.Frame()
+                init_point_center_own.p = PyKDL.Vector(0,0,0)
+                init_point_center_own.M = initial_gripper_center_ori_own
+                #center_waypoints_own.append(new_waypoint_center_own)
+
+        else:
+                transform_frame_from_own_rot_to_gripper_circle_rot = PyKDL.Frame()
+                transform_frame_from_own_rot_to_gripper_circle_rot.M = initial_gripper_circle_ori_own
+                init_point_circle_own = PyKDL.Frame()
+                init_point_circle_own.p = PyKDL.Vector(R,0,0)
+                #circle_waypoints_own.append(new_waypoint_circle_own) #Identity Rot. Later transformed
+                transform_frame_from_own_rot_to_gripper_center_rot = PyKDL.Frame()
+                transform_frame_from_own_rot_to_gripper_center_rot.M = initial_gripper_center_ori_own
+                init_point_center_own = PyKDL.Frame()
+                #center_waypoints_own.append(PyKDL.Frame()) #Identity Rot. Later transformed
+        
+        circle_waypoints.append(initial_pose) #pose
+        center_waypoints.append(center) #pose
+
+        #Create several waypoints for the circular trajectory in its own frame
+        for deg in range(step, int(degree)+step, step):
+                if abs(deg) >= abs(degree): #To have inclusive range
+                        deg = degree
+                deg = float(deg)*(math.pi/180.0)
+                new_waypoint_circle_own = PyKDL.Frame()
+                new_waypoint_circle_own.p = PyKDL.Vector(R * math.cos(deg), R * math.sin(deg), 0) #In its own frame the rotation is around z axis
+                new_waypoint_circle_own.M = init_point_circle_own.M
+                new_waypoint_center_own = PyKDL.Frame()
+                new_waypoint_center_own = copy.deepcopy(init_point_center_own)
+                if rot_gripper:
+                        new_waypoint_circle_own.M.DoRotZ(deg) #WRONG!!!! ROTATE AROUND THE OWN Z AXIS, NOT AROUND THE POSE Z AXIS
+                        new_waypoint_center_own.M.DoRotZ(deg)
+                        if not invert_y_axis:
+                                new_waypoint_circle_own = new_waypoint_circle_own * transform_frame_from_own_rot_to_gripper_circle_rot
+                                new_waypoint_center_own = new_waypoint_center_own * transform_frame_from_own_rot_to_gripper_center_rot
+
+                #circle_waypoints_own.append(new_waypoint_circle_own) #frame
+                #center_waypoints_own.append(new_waypoint_center_own) #frame
+                #Transform this circular curve that is in its own frame to the real rotation frame
+                circle_waypoint_pose_new = frame_to_pose(RM_world_own * new_waypoint_circle_own) #pose
+                center_waypoints_pose_new = frame_to_pose(RM_world_own * new_waypoint_center_own) #pose
+
                 if not rot_gripper:
                        circle_waypoint_pose_new.orientation = initial_pose.orientation
 
