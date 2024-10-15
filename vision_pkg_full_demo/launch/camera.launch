@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-    <node name="multiple_OAK" pkg="vision_pkg_full_demo" type="multiple_cameras.py" output="screen">
-    </node>
-</launch>  

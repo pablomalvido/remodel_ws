@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="tf" type="static_transform_publisher" name="platform_rf" args="-0.486 0.6601 0.7186 0 0 0 cell platform_rf 10"/>
+    <node pkg="tf" type="static_transform_publisher" name="combs_rf" args="-0.7865 0.083 1.581 0 0 0 cell combs_rf 10" /> 
+    <node pkg="tf" type="static_transform_publisher" name="ATC_rf" args="-1.54 0.805 1.4625 -1.57 0 1.57 cell ATC_rf 10" />
+    <node name="CAD_Platform_node" pkg="CAD_Platform_pkg" type="main.py" output="screen">
+        <param name="base_frame" value="/torso_base_link" />
+	<param name="files_path_rel" value="data_case1/"/>
+        <param name="cad_name" value="platform" />
+        <param name="cad_name_combs" value="combs"/>
+        <param name="cad_name_ATC" value="ATC"/>
+	<param name="jigs_file" value="Jigs_definition_v2.xml" />
+	<param name="components_file" value="Components_definition.csv" />
+	<param name="WH_file" value="WH_configuration.xml" />
+	<param name="seq_file" value="Assembly_sequence.csv" />
+    </node>
+</launch>  

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(task_planner_pkg)
+project(vision_wh_pkg)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -11,8 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   geometry_msgs
-  moveit_msgs
-  actionlib_msgs
   message_generation
 )
 
@@ -50,33 +48,31 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  configProp.msg
-  GroupTargets.msg
-  FeedbackMsg.msg
-)
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  StringArray.srv
-  Confirmation.srv
+  cablesSeparation.srv
+  cameraCapture.srv
 )
 
 ## Generate actions in the 'action' folder
-add_action_files(
-  FILES
-  process_UI.action
-)
+# add_action_files(
+#   FILES
+#   Action1.action
+#   Action2.action
+# )
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
+  std_msgs
   geometry_msgs
-  moveit_msgs
-  actionlib_msgs
 )
 
 ################################################
@@ -110,11 +106,10 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES UI_nodes_pkg
-#  CATKIN_DEPENDS rospy
-#  DEPENDS system_lib
-  CATKIN_DEPENDS rospy
+#  LIBRARIES vision_pkg_full_demo
+  CATKIN_DEPENDS rospy std_msgs
   message_runtime
+#  DEPENDS system_lib
 )
 
 ###########
@@ -130,7 +125,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/UI_nodes_pkg.cpp
+#   src/${PROJECT_NAME}/vision_pkg_full_demo.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -141,7 +136,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/UI_nodes_pkg_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/vision_pkg_full_demo_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -205,7 +200,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_UI_nodes_pkg.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_vision_pkg_full_demo.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
