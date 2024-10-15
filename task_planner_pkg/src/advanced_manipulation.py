@@ -822,6 +822,7 @@ def antiCorrectPoseSrv(req):
 rospy.Service("/adv_manip/anti_correct_pose", GetCorrectPose, antiCorrectPoseSrv)
 
 ###################################################
+preempted = False
 status_movement = 0
 status_movement2 = 0
 stop_mov = False
@@ -837,7 +838,14 @@ def callback_stop(msg):
     for group in motion_groups:
            motion_groups[group].stop()
 
-robot_status_subscriber = rospy.Subscriber('/task_planner/operation_stop', Bool, callback_stop) 
+stop_subscriber = rospy.Subscriber('/task_planner/operation_stop', Bool, callback_stop) 
+
+def callback_restart(msg):
+    global stop_mov
+    stop_mov = False
+    print("RESTART")
+
+restart_subscriber = rospy.Subscriber('/task_planner/operation_restart', Bool, callback_restart) 
 
 def callback_robot_status(msg):
     global stop_mov
@@ -2397,7 +2405,13 @@ def master_slave_plan_srv(req):
 
 rospy.Service("/adv_manip/master_slave_plan", ComputeMasterSlavePath, master_slave_plan_srv)
 
+def move_home_preempt_callback():
+        global preempted
+        #move_home_action.set_preempted()
+        preempted = True
+
 def move_home_callback(goal):
+        global preempted
         print("Moving home")
         motion_groups['torso'].set_named_target("torso_combs")
         move_group_async("torso")
@@ -2407,12 +2421,22 @@ def move_home_callback(goal):
         rospy.sleep(0.5)
         res = ExecutePlanResult()
         res.success = True
-        move_async_action.set_succeeded(res)
+        if not preempted:
+                move_async_action.set_succeeded(res)
+        else:
+                preempted = False
 
 move_home_action = actionlib.SimpleActionServer("adv_manip/move_home", ExecutePlanAction, move_home_callback, False)
+move_home_action.register_preempt_callback(move_home_preempt_callback)
 move_home_action.start()
 
+def move_async_preempt_callback():
+        global preempted
+        #move_async_action.set_preempted()
+        preempted = True
+
 def async_move_goal_callback(goal):
+        global preempted
         global move_async_action
         fb = ExecutePlanFeedback()
         res = ExecutePlanResult()
@@ -2421,12 +2445,22 @@ def async_move_goal_callback(goal):
         fb.done = True
         move_async_action.publish_feedback(fb)
         res.success = True
-        move_async_action.set_succeeded(res)
+        if not preempted:
+                move_async_action.set_succeeded(res)
+        else:
+                preempted = False
 
 move_async_action = actionlib.SimpleActionServer("adv_manip/move_group_async", ExecutePlanAction, async_move_goal_callback, False)
+move_async_action.register_preempt_callback(move_async_preempt_callback)
 move_async_action.start()
 
+def plan_async_preempt_callback():
+        global preempted
+        #exe_plan_async_action.set_preempted()
+        preempted = True
+
 def async_plan_goal_callback(goal):
+        global preempted
         global exe_plan_async_action
         fb = ExecutePlanFeedback()
         res = ExecutePlanResult()
@@ -2435,12 +2469,22 @@ def async_plan_goal_callback(goal):
         fb.done = True
         exe_plan_async_action.publish_feedback(fb)
         res.success = True
-        exe_plan_async_action.set_succeeded(res)
+        if not preempted:
+                exe_plan_async_action.set_succeeded(res)
+        else:
+                preempted = False
 
 exe_plan_async_action = actionlib.SimpleActionServer("adv_manip/execute_plan_async", ExecutePlanAction, async_plan_goal_callback, False)
+exe_plan_async_action.register_preempt_callback(plan_async_preempt_callback)
 exe_plan_async_action.start()
 
+def plan_force_preempt_callback():
+        global preempted
+        #exe_plan_force_action.set_preempted()
+        preempted = True
+
 def execute_force_goal_callback(goal):
+        global preempted
         global exe_plan_force_action
         global force_limit
         global stop_mov_force
@@ -2461,12 +2505,22 @@ def execute_force_goal_callback(goal):
         fb.done = True
         exe_plan_force_action.publish_feedback(fb)
         res.success = True
-        exe_plan_force_action.set_succeeded(res)
+        if not preempted:
+                exe_plan_force_action.set_succeeded(res)
+        else:
+                preempted = False
 
 exe_plan_force_action = actionlib.SimpleActionServer("adv_manip/execute_force_control", ExecutePlanAction, execute_force_goal_callback, False)
+exe_plan_force_action.register_preempt_callback(plan_force_preempt_callback)
 exe_plan_force_action.start()
 
+def atc_preempt_callback():
+        global preempted
+        #atc_action.set_preempted()
+        preempted = True
+
 def change_tool_callback(goal):
+        global preempted
         global ATC1
         try:
                 new_tool, success = ATC1.changeTool(goal.tool, goal.side)
@@ -2476,11 +2530,16 @@ def change_tool_callback(goal):
         res = ATCResult()
         res.success = success
         if success:
-                atc_action.set_succeeded(res)
+                if not preempted:
+                        atc_action.set_succeeded(res)
+                else:
+                        preempted = False
         else:
                 atc_action.set_aborted()
+                preempted = False
 
 atc_action = actionlib.SimpleActionServer("adv_manip/ATC", ATCAction, change_tool_callback, False)
+atc_action.register_preempt_callback(atc_preempt_callback)
 atc_action.start()
 
 def get_tool(req):

@@ -4,6 +4,7 @@ import rospy
 import time
 import actionlib
 from std_msgs.msg import *
+from task_planner_pkg.msg import *
 from ROS_UI_backend.msg import process_UIAction, process_UIGoal
 from ROS_UI_backend.msg import *
 
@@ -132,8 +133,21 @@ def step_callback(data):
 	time_running = True
 	client.send_goal(goal, feedback_cb=feedback_callback)
 
-
 subsL = rospy.Subscriber('/UI/step', Int32, step_callback)
+
+def extra_feedback_callback(data):
+	global saved_index
+	global saved_step1
+	global saved_step2
+	saved_index = data.index
+	saved_step1 = data.subindex
+	saved_step2 = data.subindex2
+	print("Feedback: " + str(saved_index) + ", " + str(saved_step1) + ", " + str(saved_step2))
+	msg = Int32()
+	msg.data = saved_index
+	index_publisher.publish(msg)
+
+subsFb = rospy.Subscriber('/task_planner/feedback', FeedbackMsg, extra_feedback_callback)
 
 def feedback_callback(feedback):
 	#This function is called when the server sends feedback
@@ -144,7 +158,7 @@ def feedback_callback(feedback):
 	saved_index = feedback.index
 	saved_step1 = feedback.subindex
 	saved_step2 = feedback.subindex2
-	print(saved_index)
+	print("FEEDBACK: " + str(saved_index) + ", " + str(saved_step1) + ", " + str(saved_step2))
 	msg = Int32()
 	msg.data = saved_index
 	index_publisher.publish(msg)

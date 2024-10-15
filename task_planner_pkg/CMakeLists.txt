@@ -54,6 +54,7 @@ add_message_files(
   FILES
   float_list.msg
   GroupTargets.msg
+  FeedbackMsg.msg
 )
 
 ## Generate services in the 'srv' folder

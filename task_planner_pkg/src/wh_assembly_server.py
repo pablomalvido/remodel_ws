@@ -27,7 +27,9 @@ logs_publisher = rospy.Publisher('/UI/logs', String, queue_size=1)
 confirmation_publisher = rospy.Publisher('/UI/confirm_req', String, queue_size=1)
 feedback_publisher = rospy.Publisher('/UI/feedback', configProp, queue_size=1)
 stop_publisher = rospy.Publisher('/task_planner/operation_stop', Bool, queue_size=1)
+restart_publisher = rospy.Publisher('/task_planner/operation_restart', Bool, queue_size=1)
 mode_publisher = rospy.Publisher('/UI/mode', String, queue_size=1)
+extra_feedback_pub = rospy.Publisher('/task_planner/feedback', FeedbackMsg, queue_size=1)
 
 #################### CONFIGURATION #########################
 rospack = rospkg.RosPack()
@@ -48,6 +50,7 @@ config2 = read_config(real_robot, config_file_name)
 
 ######################## INITIALIZATION ##############################
 #Global variables
+stop_actions = False
 holding_cables = False
 holding_comeback_pose_corrected = Pose()
 grasping_cables = False
@@ -1103,6 +1106,11 @@ def RC_insert_lift(op, step2, config, route_group, route_arm, deep):
 
         fingers_size = get_fingers_size(route_arm)
         fingers_size_aux = get_fingers_size(aux_arm)
+
+        prev_guide_end = get_shifted_pose(op["prev_guide"]["pose_corner"],[op["prev_guide"]['width']/2 + fingers_size[0]/2, op["prev_guide"]['gap']/2, config['z_offset'], 0, 0, 0])
+        next_guide_beginning = get_shifted_pose(op["next_guide"]["pose_corner"],[-fingers_size[0]/2, op["next_guide"]['gap']/2, config['z_offset'], 0, 0, 0])
+        next_guide_top_beginning = get_shifted_pose(op["next_guide"]["pose_corner"],[-fingers_size[0], op["next_guide"]['gap']/2, op["next_guide"]['height'] + config['z_offset'] + fingers_size[2], 0, 0, 0])
+        next_guide_top = get_shifted_pose(op["next_guide"]["pose_corner"],[op["next_guide"]['width']/2, op["next_guide"]['gap']/2, op["next_guide"]['height'] + config['z_offset'] + fingers_size[2], 0, 0, 0])
         
         if step2<3:
                 #Apply tension and insert
@@ -1119,10 +1127,7 @@ def RC_insert_lift(op, step2, config, route_group, route_arm, deep):
                 init_pose1 = get_current_pose(route_group).pose
                 final_insert_wp = antiCorrectPose(init_pose1, route_arm, routing_app = True) 
                 waypoints3_wrist.append(final_insert_wp)
-                prev_guide_end = get_shifted_pose(op["prev_guide"]["pose_corner"],[op["prev_guide"]['width']/2 + fingers_size[0]/2, op["prev_guide"]['gap']/2, config['z_offset'], 0, 0, 0])
-                next_guide_beginning = get_shifted_pose(op["next_guide"]["pose_corner"],[-fingers_size[0]/2, op["next_guide"]['gap']/2, config['z_offset'], 0, 0, 0])
-                next_guide_top_beginning = get_shifted_pose(op["next_guide"]["pose_corner"],[-fingers_size[0], op["next_guide"]['gap']/2, op["next_guide"]['height'] + config['z_offset'] + fingers_size[2], 0, 0, 0])
-                next_guide_top = get_shifted_pose(op["next_guide"]["pose_corner"],[op["next_guide"]['width']/2, op["next_guide"]['gap']/2, op["next_guide"]['height'] + config['z_offset'] + fingers_size[2], 0, 0, 0])
+                
                 if compute_distance(prev_guide_end, next_guide_beginning) > config['x_offset']:
                         if step2==8:
                                 next_guide_offset = get_shifted_pose(op["next_guide"]["pose_corner"],[-config['x_offset'] - fingers_size[0]/2, op["next_guide"]['gap']/2, config['z_offset'], 0, 0, 0])
@@ -1908,6 +1913,7 @@ def master_slave_plan(list_wp, EE_speed, arm_side, type=1):
 
 #ROS actions
 def move_home():
+        global stop_actions
         home_done=False
         success=False
         client=actionlib.SimpleActionClient('/adv_manip/move_home', ExecutePlanAction)
@@ -1915,6 +1921,9 @@ def move_home():
         goal = ExecutePlanGoal()
         client.send_goal(goal)
         while not home_done:
+                if stop_actions:
+                        rospy.sleep(0.05)
+                        client.cancel_goal()
                 rospy.sleep(0.05)
                 state = client.get_state()
                 if state==2 or state == 3 or state == 4:
@@ -1936,12 +1945,16 @@ def async_move_feedback_callback(fb):
 def move_group_async(group):
         global async_move_done
         global step_inc_fb
+        global stop_actions
         client=actionlib.SimpleActionClient('/adv_manip/move_group_async', ExecutePlanAction)
         client.wait_for_server()
         goal = ExecutePlanGoal()
         goal.group = group
         client.send_goal(goal, feedback_cb=async_move_feedback_callback)
         while not async_move_done:
+                if stop_actions:
+                        rospy.sleep(0.05)
+                        client.cancel_goal()
                 rospy.sleep(0.05)
                 state = client.get_state()
                 if state==2 or state == 3 or state == 4:
@@ -1961,12 +1974,16 @@ def async_plan_feedback_callback(fb):
 def execute_plan_async(group, plan):
         global async_plan_done
         global step_inc_fb
+        global stop_actions
         client=actionlib.SimpleActionClient('/adv_manip/execute_plan_async', ExecutePlanAction)
         client.wait_for_server()
         goal = ExecutePlanGoal()
         goal.group = group; goal.plan = plan
         client.send_goal(goal, feedback_cb=async_plan_feedback_callback)
         while not async_plan_done:
+                if stop_actions:
+                        rospy.sleep(0.05)
+                        client.cancel_goal()
                 rospy.sleep(0.05)
                 state = client.get_state()
                 if state==2 or state == 3 or state == 4:
@@ -1986,12 +2003,16 @@ def execute_force_control_callback(fb):
 def execute_force_control(group, plan, limit, force_active = True):
         global force_plan_done
         global step_inc_fb
+        global stop_actions
         client=actionlib.SimpleActionClient('/adv_manip/execute_force_control', ExecutePlanAction)
         client.wait_for_server()
         goal = ExecutePlanGoal()
         goal.group = group; goal.plan = plan; goal.force_active = force_active; goal.force_limit = limit
         client.send_goal(goal, feedback_cb=execute_force_control_callback)
         while not force_plan_done:
+                if stop_actions:
+                        rospy.sleep(0.05)
+                        client.cancel_goal()
                 rospy.sleep(0.05)
                 state = client.get_state()
                 if state==2 or state == 3 or state == 4:
@@ -2000,10 +2021,12 @@ def execute_force_control(group, plan, limit, force_active = True):
         return step_inc_fb
 
 def stop_function(msg):
+        global stop_actions
         stop_publisher.publish(Bool())
         msg_log = String()
         msg_log.data = msg
         logs_publisher.publish(msg_log)
+        stop_actions = True
 
 def get_fingers_size(side):
         rospy.wait_for_service('/adv_manip/get_fingers_size')
@@ -2020,6 +2043,7 @@ def get_tool(side):
         return tool_srv(req.data).data
 
 def change_tool(new_tool, side):
+        global stop_actions
         print("CHANGE TOOL")
         client=actionlib.SimpleActionClient('/adv_manip/ATC', ATCAction) #Stablishes the connection with the server
         client.wait_for_server()
@@ -2029,6 +2053,9 @@ def change_tool(new_tool, side):
         success = False
         atc_done = False
         while not atc_done:
+                if stop_actions:
+                        rospy.sleep(0.05)
+                        client.cancel_goal()
                 rospy.sleep(0.05)
                 state = client.get_state()
                 if state==2 or state == 3 or state == 4:
@@ -2045,6 +2072,7 @@ def eef_feedback_callback(fb):
 
 def actuate_eef(type, distance=0, speed=0, arm="left", grasp=False):
         global eef_done
+        global stop_actions
         client=actionlib.SimpleActionClient('/EEF/actuate', EEFActAction) #Stablishes the connection with the server
         client.wait_for_server()
         goal = EEFActGoal()
@@ -2281,6 +2309,9 @@ class WireHarnessAssembly(object):
                 mode_publisher.publish(msg)
 
         def publish_feedback(self, step1, step2, message=""):
+                fbm=FeedbackMsg()
+                fbm.index = self._index; fbm.subindex = step1; fbm.subindex2 = step2
+                extra_feedback_pub.publish(fbm)
                 self._feedback.index = self._index
                 self._feedback.subindex = step1
                 self._feedback.subindex2 = step2
@@ -2291,7 +2322,10 @@ class WireHarnessAssembly(object):
                 #This is the function called when the server receives a call from the client, and it receives the info of the goal topic, sent from the client
                 global modeUI
                 global config2
+                global stop_actions
                 self._stop_action = False
+                stop_actions = False
+                restart_publisher.publish(Bool())
                 r=rospy.Rate(1) #1Hz
                 success=False
                 self._index = goal.index
@@ -2312,6 +2346,7 @@ class WireHarnessAssembly(object):
                                         break
                                 else:
                                         completed, step1, step2 = execute_operation(ops_info[self._index], step1, step2, config2)
+                                        print(step2)
                                         if completed:
                                                 msg_log = String()
                                                 msg_log.data = "Operation " + str(self._index) + " finished"
@@ -2320,7 +2355,7 @@ class WireHarnessAssembly(object):
                                                 self._index+=1; step1 = 0; step2 = 0
                                                 if self._index == (len(ops_info)-1):
                                                         success=True
-                                        else:
+                                        elif self._stop_action:
                                               print("Paused in: " + str(self._index) + ", step1: " + str(step1) + ", step2: " + str(step2)) 
                                         self.publish_feedback(step1, step2)
                                         rospy.sleep(1)
