@@ -5,8 +5,7 @@ import time
 import actionlib
 from std_msgs.msg import *
 from task_planner_pkg.msg import *
-from ROS_UI_backend.msg import process_UIAction, process_UIGoal
-from ROS_UI_backend.msg import *
+from task_planner_pkg.msg import process_UIAction, process_UIGoal
 
 saved_index = 0
 saved_step1 = 0

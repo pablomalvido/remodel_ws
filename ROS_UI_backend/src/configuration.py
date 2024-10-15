@@ -2,18 +2,22 @@
 
 import sys
 import rospy 
+import rospkg
 import time
 import os
 import csv
 from std_srvs.srv import *
-from UI_nodes_pkg.srv import *
-from UI_nodes_pkg.msg import *
+from ROS_UI_backend.srv import *
+from ROS_UI_backend.msg import *
 
 rospy.init_node('config_node', anonymous=True)
 get_config_service = '/UI/get_config'
 set_config_service = '/UI/set_config'
-path_current = os.path.dirname(__file__)
-path_config = os.path.join(path_current, '../files/config.csv')
+rospack = rospkg.RosPack()
+config_full_pkg_path = str(rospack.get_path('task_planner_pkg'))
+path_config = config_full_pkg_path + "/files/config.csv"
+# path_current = os.path.dirname(__file__)
+# path_config = os.path.join(path_current, '../files/config.csv')
 
 config_dict = {}
 fieldnames = ['prop', 'value']
