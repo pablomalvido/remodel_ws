@@ -1,2 +1,0 @@
-string group
-string[] targets
