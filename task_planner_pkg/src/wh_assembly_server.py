@@ -382,14 +382,14 @@ def separate_cables(op, step2=0, config=[], route_group="", route_arm=""):
                                 if not capture_success:
                                         stop_function("Failed to take the cables image")
                         else:
-                                img_cables_path = str(rospack.get_path('vision_pkg_full_demo')) + '/imgs/Image_cables_wh1_386.jpg' #Image_cables_43
-                                separation_point = [19.498687694359937, -12.956617868950271, -1.0002328393548083]
-                                separation_point_success = True
+                                img_cables_path = str(rospack.get_path('vision_pkg_full_demo')) + '/imgs/Image_cables_wh1_386.jpg'
+                                #separation_point = [19.498687694359937, -12.956617868950271, -1.0002328393548083]
+                                #separation_point_success = True
 
                         msg_log = String()
                         msg_log.data = "Calculating grasp point..."
                         logs_publisher.publish(msg_log)
-                        #separation_point, separation_point_success = compute_separation_pose(img_cables_path, op['WH'], op['label'], pixel_D_param, dist_next=50, forward=False)
+                        separation_point, separation_point_success = compute_separation_pose(img_cables_path, op['WH'], op['label'], pixel_D_param, dist_next=50, forward=False)
                         print("SEPARATION POINT: " + str(separation_point))
                         grasp_point_global = [float(separation_point[0])/1000, float(separation_point[1])/1000]
                         grasp_angle_temp = float(separation_point[2])
@@ -406,32 +406,22 @@ def separate_cables(op, step2=0, config=[], route_group="", route_arm=""):
                         img_name = img_cables_path.split('/')[-1]
                         confirm_msg = String()
                         confirm_msg.data = img_cables_path[:-len(img_name)]+'Grasp_point_'+img_name
-                        #confirmation_publisher.publish(confirm_msg)
-                        #while not confirmation_received: #Wait until the UI accepts
-                        #        rospy.sleep(0.1)
+                        confirmation_publisher.publish(confirm_msg)
+                        while not confirmation_received: #Wait until the UI accepts
+                                rospy.sleep(0.1)
                         
                         os.system('cp ' + str(rospack.get_path('vision_pkg_full_demo')) + '/imgs/error_grasp_1.jpg /home/remodel/UI-REMODEL/src/assets/img/grasp_image.jpg')
                         confirmation_received = False
-                        # if confirmation_msg == "N":
-                        #         stop_function("Grasp canceled")
-                        # elif confirmation_msg == "R":
-                        #         pixel_D_param += 1
-                        #         repeat = True
+                        if confirmation_msg == "N":
+                                stop_function("Grasp canceled")
+                        elif confirmation_msg == "R":
+                                pixel_D_param += 1
+                                repeat = True
 
                 if separation_point_success:
-                        print("A")
                         actuate_grippers(config['open_distance'], config['gripper_speed'], separation_arm, grasp=False)
                         print(grasp_point_global)
                         init_pose = get_current_pose(separation_group).pose
-
-                        # test_point = get_shifted_pose(op["spot"][0]["pose_corner"], [0.03, op["spot"][0]['gap']/2, op["spot"][0]["height"], 0, 0, 0])
-                        # test_point_corrected = correctPose(test_point, separation_arm, rotate = True, routing_app = False, ATC_sign = -1, secondary_frame = True)
-                        # waypoints_test = [init_pose, test_point_corrected]
-                        # plan, success, motion_group_plan = compute_cartesian_path_velocity_control_arms_occlusions([waypoints_test], [speed_execution], arm_side=separation_arm)
-                        # if success:
-                        #         execute_plan_async(motion_group_plan, plan)
-                        # exit()
-
                         grasp_point = get_shifted_pose(op["spot"][0]["pose_corner"], [grasp_point_global[0], op["spot"][0]['gap']/2, op["spot"][0]["height"] + grasp_point_global[1], 0, 0, 0])
                         grasp_point_offset = get_shifted_pose(grasp_point, [0, 0, (config['z_offset']*2) - grasp_point_global[1], 0, 0, 0])
                         grasp_point_corrected = correctPose(grasp_point, separation_arm, rotate = True, routing_app = not rotate_gripper_z, ATC_sign = -1, secondary_frame = True)
@@ -443,7 +433,6 @@ def separate_cables(op, step2=0, config=[], route_group="", route_arm=""):
                         print(step2) 
                 else:
                         stop_function("Grasp point determination failed")
-                #exit()
                                 
         if step2 == 2:
                 actuate_grippers(config['slide_distance'], config['gripper_speed'], separation_arm, grasp=False)
@@ -463,13 +452,13 @@ def separate_cables(op, step2=0, config=[], route_group="", route_arm=""):
                         if not capture_success:
                                 stop_function("Failed to take the cables image")
                 else:
-                        img_cables_path = str(rospack.get_path('vision_pkg_full_demo')) + '/imgs/Image_cables_wh1_387.jpg' #Image_cables_1
+                        img_cables_path = str(rospack.get_path('vision_pkg_full_demo')) + '/imgs/Image_cables_wh1_366.jpg' #Image_cables_1
 
                 msg_log = String()
                 msg_log.data = "Evaluating cable separation..."
                 logs_publisher.publish(msg_log)
                 grasp_point_eval_mm = [int((2*config['z_offset'])*1000), int((config['x_offset']+grasp_point_global[0])*1000)]
-                result_msg, separation_success, eval_success = check_cable_separation(img_path=img_cables_path, wh=op['WH'], sep_index=op['label'], pixel_D=8, grasp_point_eval_mm=grasp_point_eval_mm)
+                result_msg, separation_success, eval_success = check_cable_separation(img_path=img_cables_path, wh=op['WH'], sep_index=op['label'], pixel_D=6, grasp_point_eval_mm=grasp_point_eval_mm)
                 msg_log.data = result_msg
                 logs_publisher.publish(msg_log)
                 print(result_msg)
@@ -479,7 +468,7 @@ def separate_cables(op, step2=0, config=[], route_group="", route_arm=""):
                         #step2 = 0
                         print("Successful cable separation")
                 else:
-                        if eval_success:
+                        if eval_success: #Future works: Start a corrective action
                                 #stop_function("Cable separation was not succesful")
                                 print("Cable separation was not succesful")
                         else:

@@ -287,7 +287,6 @@ def check_cable_separation_srv_callback(req):
 
     total_time_init = time.time()
     p = DLO_estimator(img_path=req.img_path, all_colors=WH_info[req.wh_id]['cable_colors'], color_order = WH_info[req.wh_id]['cables_color_order'], con_points=WH_info[req.wh_id]['con_corners'], cable_D=WH_info[req.wh_id]['cable_D'], con_dim=WH_info[req.wh_id]['con_dim'], cable_lengths=WH_info[req.wh_id]['cable_lengths'], model=DLO_model, grasping_point_eval_mm=req.grasp_point_eval_mm, grasp_area_mm=[50,100], corner_mold=WH_info[req.wh_id]['mold_corners'], mold_size=WH_info[req.wh_id]['mold_dim'], index_upper=desired_grasp_cables[0], pixel_D=req.pixel_D, analyzed_length=req.analyzed_length, segm_opt=2, simplified=req.simplified)
-    return resp
     if not show_imgs:
         all_points_cables, grasped_cables, wrong_estimated_cables = p.exec(req.forward, req.iteration, evaluate_grasp = True)
         total_time = time.time() - total_time_init
@@ -317,7 +316,8 @@ if __name__ == "__main__": #Load the model and define some info for each WH in a
     WH_info = {}
     grasp_calculation = GraspPointCalculation()
 
-    #All cable colors in BGR scale
+    ##### Get all this info from the CAD Platform to full reconfigurability. Currently it allows fast testing #####
+    #All cable colors in BGR scale. 
     yellow_cable = [40,141,171]
     blue_cable = [157,99,48]
     green_cable = [43,108,50]
@@ -337,11 +337,6 @@ if __name__ == "__main__": #Load the model and define some info for each WH in a
     WH_info['1']['cable_lengths'] = [550, 550, 550, 550, 550, 550, 550, 550, 550, 550]
     WH_info['1']['con_dim'] = 27
     WH_info['1']['cable_D'] = 1.32
-    #WH_info['1']['con_corners'] = [[640, 760], [435, 755]] #below,above [y,x].
-    #WH_info['1']['mold_corners'] = [[417, 750], [663, 757]] #below,above [y,x]. These points are fixed as the image is always taken from the same position
-    #WH_info['1']['mold_dim'] = 40
-    # WH_info['1']['con_corners'] = [[550, 688], [333, 686]] #below,above [y,x]. 4
-    # WH_info['1']['mold_corners'] = [[294, 682], [550, 681]] #above,below [y,x]. 4
     WH_info['1']['con_corners'] =  [[553, 863], [333, 865]] #[[552, 890], [328, 895]] #below,above [y,x]. #[557, 890], [345, 895]. 10
     WH_info['1']['mold_corners'] = [[294, 865], [553, 863]] #[[262, 891], [557, 884]] #above,below [y,x]. 10
     WH_info['1']['mold_dim'] = 32
