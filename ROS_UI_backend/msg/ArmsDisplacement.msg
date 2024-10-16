@@ -1,2 +1,0 @@
-Displacement left
-Displacement right

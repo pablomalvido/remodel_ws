@@ -1,2 +1,0 @@
-string prop
-string value
