@@ -2,6 +2,12 @@
 
 This is the repository of the journal article entitled: "An Approach for the Automatic Assembly of Multi-branch Wire Harnesses in the Automotive Industry using a Dual-Arm Robot", which is currently under review.
 
+## Main dependencies
+ROS Noetic
+Python 3.9
+OpenCV 4.5
+TensorFlow 2.10
+
 ## System structure
 
 The proposed ROS system is composed of six main modules, which interact between them to achieve the desired system functionality.
