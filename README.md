@@ -4,8 +4,11 @@ This is the repository of the journal article entitled: "An Approach for the Aut
 
 ## Main dependencies
 ROS Noetic
+
 Python 3.9
+
 OpenCV 4.5
+
 TensorFlow 2.10
 
 ## System structure
